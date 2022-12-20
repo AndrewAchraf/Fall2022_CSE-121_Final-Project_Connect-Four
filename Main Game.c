@@ -7,7 +7,7 @@
 #define w 7
 
 
-char board[h][w]={};
+char board[h][w]={'\0'};
 void draw_board();
 void take_player_turn();
 
@@ -23,7 +23,7 @@ void draw_board(){
     printf("\tConnect Four\n");
     for(int i=0; i<h; i++){
         for(int j=0; j<w; j++){
-            printf("| %d |", board[i][j]);
+            printf("| %c |", board[i][j]);
         }
         printf("\n");
         printf("-----------------------------------\n");
@@ -31,8 +31,9 @@ void draw_board(){
 }
 
 void take_player_turn(){
-    int m, r, c;
-    printf("Enter new value: "); scanf("%d", &m);
+    char m;
+    int r, c;
+    printf("Enter new value: "); scanf("%c", &m);
     printf("Enter row num: "); scanf("%d", &r); r--;
     printf("Enter col num: "); scanf("%d", &c); c--;
     board [r][c] = m;
