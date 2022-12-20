@@ -7,16 +7,28 @@
 #define w 7
 
 
-char board[h][w]={'\0'};
+char board[h][w];
+void clear_board();
 void draw_board();
 void take_player_turn();
 
 int main(){
+    clear_board();
     draw_board();
     take_player_turn();
     draw_board();
     return 0;
 }
+
+
+void clear_board(){
+    for(int i=0; i<h; i++){
+        for(int j=0; j<w; j++){
+            board[i][j]= ' ';
+        }
+    }
+}
+
 
 void draw_board(){
     system("cls");
@@ -38,4 +50,5 @@ void take_player_turn(){
     printf("Enter col num: "); scanf("%d", &c); c--;
     board [r][c] = m;
 }
+
 
