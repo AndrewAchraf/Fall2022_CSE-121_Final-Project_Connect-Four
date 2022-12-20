@@ -3,11 +3,9 @@
 #include <conio.h>
 #include <windows.h>
 #include <MMsystem.h>
-#define h 6
-#define w 7
 
 
-char board[h][w];
+
 void clear_board();
 void draw_board();
 void take_player_turn();
@@ -15,10 +13,15 @@ void mainMenu();
 
 int main(){
     mainMenu();
-    clear_board();
-    draw_board();
+    int rows,columns;
+    printf("Enter the size of the grid:");
+    scanf("%d %d",&rows,&columns);
+    char array[rows][columns];
+
+    clear_board(rows,columns,array);
+    draw_board(rows,columns,array);
     take_player_turn();
-    draw_board();
+    draw_board(rows,columns,array);
     return 0;
 }
 
@@ -39,24 +42,37 @@ void mainMenu(){
     }
 }
 
-void clear_board(){
-    for(int i=0; i<h; i++){
-        for(int j=0; j<w; j++){
-            board[i][j]= ' ';
+void clear_board(int rows,int columns,char array[rows][columns]){
+    int i,j;
+    for (i=0;i<rows;i++){
+        for(j=0;j<columns;j++){
+            array[i][j]=' ';
         }
     }
+    int header[columns];
+    for(j=0;j<columns;j++){
+        header[j]=j+1;
+    }
+    for(j=0;j<columns;j++){
+            printf("  %d ",header[j]);
+    }
+    printf("\n");
 }
 
 
-void draw_board(){
+void draw_board(int rows,int columns,char array[rows][columns]){
     system("cls");
     printf("\tConnect Four\n");
-    for(int i=0; i<h; i++){
-        for(int j=0; j<w; j++){
-            printf("| %c |", board[i][j]);
+    int i,j;
+    for (i=0;i<rows;i++){
+        for(j=0;j<columns;j++){
+            printf("| %c ", array[i][j]);
         }
-        printf("\n");
-        printf("-----------------------------------\n");
+        printf("|\n");
+        for(j=0;j<columns;j++){
+            printf("----");
+        }
+        printf("-\n");
     }
 }
 
@@ -66,7 +82,7 @@ void take_player_turn(){
     printf("Enter new value: "); scanf("%c", &m);
     printf("Enter row num: "); scanf("%d", &r); r--;
     printf("Enter col num: "); scanf("%d", &c); c--;
-    board [r][c] = m;
+
 }
 
 
