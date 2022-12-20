@@ -11,8 +11,10 @@ char board[h][w];
 void clear_board();
 void draw_board();
 void take_player_turn();
+void mainMenu();
 
 int main(){
+    mainMenu();
     clear_board();
     draw_board();
     take_player_turn();
@@ -20,6 +22,22 @@ int main(){
     return 0;
 }
 
+
+void mainMenu(){
+    printf(" 1:Start a new game\n 2:Load a previous game\n 3:Quit\n");
+    int choice;
+    scanf("%d",&choice);
+    switch(choice){
+        case 1: printf(" 1:One player\n 2:Two players\n");
+                scanf("%d",&choice);
+                switch(choice){
+                    case 1: draw_board(); break;
+                    case 2: draw_board(); break;
+                }
+        case 2: /*extract from a file*/ break;
+        case 3: break;
+    }
+}
 
 void clear_board(){
     for(int i=0; i<h; i++){
