@@ -10,18 +10,24 @@ void clear_board();
 void draw_board();
 void take_player_turn();
 void mainMenu();
+int check_if_valid_col();
+
 
 int main(){
     mainMenu();
     int rows,columns;
-    printf("Enter the size of the grid:");
+    printf("Enter the size of the grid: ");
     scanf("%d %d",&rows,&columns);
     char array[rows][columns];
 
     clear_board(rows,columns,array);
     draw_board(rows,columns,array);
-    take_player_turn();
+    take_player_turn(rows,columns,array);
     draw_board(rows,columns,array);
+
+    take_player_turn(rows,columns,array);
+    draw_board(rows,columns,array);
+
     return 0;
 }
 
@@ -76,13 +82,34 @@ void draw_board(int rows,int columns,char array[rows][columns]){
     }
 }
 
-void take_player_turn(){
-    char m;
-    int r, c;
-    printf("Enter new value: "); scanf("%c", &m);
-    printf("Enter row num: "); scanf("%d", &r); r--;
-    printf("Enter col num: "); scanf("%d", &c); c--;
+void take_player_turn(int rows,int columns,char array[rows][columns]){
+    int enteredCol;
+    while(1){
+        printf("Enter col num: "); scanf("%d", &enteredCol); enteredCol--;
+        if( check_if_valid_col(rows, columns, array, enteredCol) ){
+            int i=0;
+            while(array[i][enteredCol] ==' ' && i<rows){
+                i++;
+            }
+            array[i-1][enteredCol]= 'X';
+            break;
+        }
+        else{
+            printf("Invalid Input !\n");
+        }
+    }
+}
 
+int check_if_valid_col(int rows,int columns,char array[rows][columns], int enteredCol){
+    if(enteredCol>columns || enteredCol < 1){
+        return 0;
+    }
+    else if(array[0][enteredCol]== 'X'){
+        return 0;
+    }
+    else{
+        return 1;
+    }
 }
 
 
