@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <conio.h>
@@ -17,11 +16,27 @@ int check_if_valid_col();
 void takeComputerTurn();
 
 int main(){
-    mainMenu();
+    printf(" 1:Start a new game\n 2:Load a previous game\n 3:Quit\n");
+    int choice;
+    scanf("%d",&choice);
     int rows,columns;
-    printf("Enter the size of the grid: ");
-    scanf("%d %d",&rows,&columns);
     char array[rows][columns];
+    switch(choice){
+        case 1: printf(" 1:One player\n 2:Two players\n");
+                scanf("%d",&choice);
+                switch(choice){
+                    case 1: printf("Enter the size of the grid: ");
+                            scanf("%d %d",&rows,&columns);
+                            clear_board(rows,columns,array);
+                            draw_board(rows,columns,array);
+                            break;
+                    case 2: draw_board(); break;
+                }
+        case 2: /*extract from a file*/ break;
+        case 3: break;
+    }
+
+
 
     clear_board(rows,columns,array);
     draw_board(rows,columns,array);
@@ -34,7 +49,6 @@ int main(){
 
     /*take_player_turn(rows,columns,array);
     draw_board(rows,columns,array);
-
     takeComputerTurn(rows,columns,array);
     draw_board(rows,columns,array);*/
 
@@ -42,21 +56,6 @@ int main(){
 }
 
 
-void mainMenu(){
-    printf(" 1:Start a new game\n 2:Load a previous game\n 3:Quit\n");
-    int choice;
-    scanf("%d",&choice);
-    switch(choice){
-        case 1: printf(" 1:One player\n 2:Two players\n");
-                scanf("%d",&choice);
-                switch(choice){
-                    case 1: draw_board(); break;
-                    case 2: draw_board(); break;
-                }
-        case 2: /*extract from a file*/ break;
-        case 3: break;
-    }
-}
 
 void clear_board(int rows,int columns,char array[rows][columns]){
     int i,j;
@@ -65,6 +64,14 @@ void clear_board(int rows,int columns,char array[rows][columns]){
             array[i][j]=' ';
         }
     }
+
+}
+
+
+void draw_board(int rows,int columns,char array[rows][columns]){
+    system("cls");
+    printf("\tConnect Four\n");
+    int i,j;
     int header[columns];
     for(j=0;j<columns;j++){
         header[j]=j+1;
@@ -73,13 +80,6 @@ void clear_board(int rows,int columns,char array[rows][columns]){
             printf("  %d ",header[j]);
     }
     printf("\n");
-}
-
-
-void draw_board(int rows,int columns,char array[rows][columns]){
-    system("cls");
-    printf("\tConnect Four\n");
-    int i,j;
     for (i=0;i<rows;i++){
         for(j=0;j<columns;j++){
             printf("| %c ", array[i][j]);
