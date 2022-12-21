@@ -1,9 +1,12 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <conio.h>
 #include <windows.h>
 #include <MMsystem.h>
 
+const char PLAYER1='X';
+const char PLAYER2='O';
 
 
 void clear_board();
@@ -11,7 +14,7 @@ void draw_board();
 void take_player_turn();
 void mainMenu();
 int check_if_valid_col();
-
+void takeComputerTurn();
 
 int main(){
     mainMenu();
@@ -22,11 +25,18 @@ int main(){
 
     clear_board(rows,columns,array);
     draw_board(rows,columns,array);
+    while(1){
     take_player_turn(rows,columns,array);
     draw_board(rows,columns,array);
 
-    take_player_turn(rows,columns,array);
+    takeComputerTurn(rows,columns,array);
+    draw_board(rows,columns,array);}
+
+    /*take_player_turn(rows,columns,array);
     draw_board(rows,columns,array);
+
+    takeComputerTurn(rows,columns,array);
+    draw_board(rows,columns,array);*/
 
     return 0;
 }
@@ -91,7 +101,7 @@ void take_player_turn(int rows,int columns,char array[rows][columns]){
             while(array[i][enteredCol] ==' ' && i<rows){
                 i++;
             }
-            array[i-1][enteredCol]= 'X';
+            array[i-1][enteredCol]= PLAYER1;
             break;
         }
         else{
@@ -101,10 +111,10 @@ void take_player_turn(int rows,int columns,char array[rows][columns]){
 }
 
 int check_if_valid_col(int rows,int columns,char array[rows][columns], int enteredCol){
-    if(enteredCol>columns || enteredCol < 1){
+    if(enteredCol>=columns || enteredCol < 0){
         return 0;
     }
-    else if(array[0][enteredCol]== 'X'){
+    else if(array[0][enteredCol]== PLAYER1 || array[0][enteredCol]==PLAYER2 ){
         return 0;
     }
     else{
@@ -112,4 +122,19 @@ int check_if_valid_col(int rows,int columns,char array[rows][columns], int enter
     }
 }
 
+void takeComputerTurn(int rows,int columns,char array[rows][columns]){
+    srand(time(0));
+    int i,j;
+        do{
+           j= rand()%columns;
+        }
+        while(array[0][j]!=' ');
+        for(i=0;i<rows;i++){
+            if(array[i][j]!=' '){
+                break;
+            }
+        }
+
+    array[i-1][j]=PLAYER2;
+}
 
