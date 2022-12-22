@@ -279,6 +279,18 @@ void player_vs_computer(){
             draw_board(rows,columns,array, player1, computer);
         }
         //print_winner();
+        if (player1.score>computer.score){
+            printf("WINNER! Great Job ");
+            fputs(player1.name,stdout);
+            printf(".\n");
+        }
+        else if (player1.score<computer.score){
+            printf("You Lost. Hard luck. Have another try.\n");
+        }
+        else{
+            printf("Draw.\n");
+        }
+
         printf("1: Play Again\n2: Main Menu\n");
         scanf("%d", &response);
         switch(response){
@@ -339,6 +351,20 @@ void player_vs_player(){
             draw_board(rows,columns,array, player1, player2);
         }
         //print_winner();
+        if(player1.score>player2.score){
+            printf("You Won! Congrats ");
+            fputs(player1.name,stdout);
+            printf(".\n");
+        }
+        else if (player1.score<player2.score){
+            printf("You Won! Congrats ");
+            fputs(player2.name,stdout);
+            printf(".\n");
+        }
+        else{
+            printf("Draw.\n");
+        }
+
         printf("1: Play Again\n2: Main Menu\n");
         scanf("%d", &response);
         switch(response){
