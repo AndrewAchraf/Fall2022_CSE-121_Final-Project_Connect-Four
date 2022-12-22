@@ -205,17 +205,48 @@ void print_names_and_scores(char name[], int score){
 
 void check_scores(int rows,int columns,char array[rows][columns], int enteredRow, int enteredCol, int *playerScore){
     //check horizontal
-    if((enteredCol<(columns-4) && (array[enteredRow][enteredCol] == array[enteredRow][enteredCol+1] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol+2] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol+3]))
-       || (enteredCol >= 3 && (array[enteredRow][enteredCol] == array[enteredRow][enteredCol-1] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol-2] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol-3]))){
-
+    if(array[enteredRow][enteredCol]==PLAYER1 && ((enteredCol<(columns-3) && (array[enteredRow][enteredCol] == array[enteredRow][enteredCol+1]
+       && array[enteredRow][enteredCol]==array[enteredRow][enteredCol+2] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol+3])))){
         (*playerScore)++;
 
     }
+    if(array[enteredRow][enteredCol]==PLAYER1 &&(enteredCol >= 3 && (array[enteredRow][enteredCol] == array[enteredRow][enteredCol-1]
+       && array[enteredRow][enteredCol]==array[enteredRow][enteredCol-2] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol-3]))){
+       (*playerScore)++;
 
+    }
+
+    if(array[enteredRow][enteredCol]==PLAYER2 && ((enteredCol<(columns-3) && (array[enteredRow][enteredCol] == array[enteredRow][enteredCol+1]
+       && array[enteredRow][enteredCol]==array[enteredRow][enteredCol+2] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol+3])))){
+        (*playerScore)++;
+
+    }
+    if(array[enteredRow][enteredCol]==PLAYER2 &&(enteredCol >= 3 && (array[enteredRow][enteredCol] == array[enteredRow][enteredCol-1]
+       && array[enteredRow][enteredCol]==array[enteredRow][enteredCol-2] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol-3]))){
+       (*playerScore)++;
+
+    }
         //check vertical
-    if((enteredRow<rows-4 && (array[enteredRow][enteredCol] == array[enteredRow+1][enteredCol] && array[enteredRow][enteredCol]==array[enteredRow+2][enteredCol] && array[enteredRow][enteredCol]==array[enteredRow+3][enteredCol])) || (enteredRow>=3 && (array[enteredRow][enteredCol] == array[enteredRow-1][enteredCol] && array[enteredRow][enteredCol]==array[enteredRow-2][enteredCol] && array[enteredRow][enteredCol]==array[enteredRow-3][enteredCol]))){
+    if(array[enteredRow][enteredCol]==PLAYER1 && ((enteredRow<rows-3 && (array[enteredRow][enteredCol] == array[enteredRow+1][enteredCol]
+       && array[enteredRow][enteredCol]==array[enteredRow+2][enteredCol] && array[enteredRow][enteredCol]==array[enteredRow+3][enteredCol])))){
 
         (*playerScore)++;
-
     }
+    if(array[enteredRow][enteredCol]==PLAYER1 &&(enteredRow>=3 && (array[enteredRow][enteredCol] == array[enteredRow-1][enteredCol]
+       && array[enteredRow][enteredCol]==array[enteredRow-2][enteredCol] && array[enteredRow][enteredCol]==array[enteredRow-3][enteredCol]))){
+       (*playerScore)++;
+       }
+
+
+    if(array[enteredRow][enteredCol]==PLAYER2 && ((enteredRow<rows-3 && (array[enteredRow][enteredCol] == array[enteredRow+1][enteredCol]
+       && array[enteredRow][enteredCol]==array[enteredRow+2][enteredCol] && array[enteredRow][enteredCol]==array[enteredRow+3][enteredCol])))){
+
+        (*playerScore)++;
+    }
+    if(array[enteredRow][enteredCol]==PLAYER2 &&(enteredRow>=3 && (array[enteredRow][enteredCol] == array[enteredRow-1][enteredCol]
+       && array[enteredRow][enteredCol]==array[enteredRow-2][enteredCol] && array[enteredRow][enteredCol]==array[enteredRow-3][enteredCol]))){
+       (*playerScore)++;
+       }
 }
+
+
