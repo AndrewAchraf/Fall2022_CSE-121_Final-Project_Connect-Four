@@ -27,8 +27,8 @@ void print_names_and_scores();
 void check_scores();
 void player_vs_computer();
 void player_vs_player();
-
-
+void printWinnerPlayerVsComputer();
+void printWinnerPlayerVsPlayer();
 
 int main(){
 
@@ -106,7 +106,21 @@ void draw_board(int rows,int columns,char array[rows][columns], Player player1, 
     printf("\n");
     for (i=0;i<rows;i++){
         for(j=0;j<columns;j++){
-            printf("| %c ", array[i][j]);
+            printf("| ");
+            if(array[i][j]==PLAYER1){
+                red();
+                printf("%c ", array[i][j]);
+                reset();
+            }
+            else if(array[i][j]==PLAYER2){
+                yellow();
+                printf("%c ", array[i][j]);
+                reset();
+            }
+            else{
+                printf(" %c",array[i][j]);
+            }
+
         }
         printf("|\n");
         for(j=0;j<columns;j++){
@@ -122,7 +136,9 @@ void take_player_turn(int rows,int columns,char array[rows][columns], Player *pl
         for (int i=0; i<strlen((*player).name); i++){
         printf("%c", (*player).name[i]);
         }
-        printf("'s turn, please enter col num: "); scanf("%d", &enteredCol); enteredCol--;
+        printf("'s turn, please enter col num: ");
+        scanf("%d", &enteredCol);
+        enteredCol--;
         if( check_if_valid_col(rows, columns, array, enteredCol) ){
             int i=0;
             while(array[i][enteredCol] ==' ' && i<rows){
@@ -135,8 +151,9 @@ void take_player_turn(int rows,int columns,char array[rows][columns], Player *pl
         else{
             printf("Invalid Input !\n");
         }
+        }
     }
-}
+
 
 void takeComputerTurn(int rows,int columns,char array[rows][columns], Player *computer){
     srand(time(0));
@@ -278,18 +295,8 @@ void player_vs_computer(){
             takeComputerTurn(rows,columns,array, &computer );
             draw_board(rows,columns,array, player1, computer);
         }
-        //print_winner();
-        if (player1.score>computer.score){
-            printf("WINNER! Great Job ");
-            fputs(player1.name,stdout);
-            printf(".\n");
-        }
-        else if (player1.score<computer.score){
-            printf("You Lost. Hard luck. Have another try.\n");
-        }
-        else{
-            printf("Draw.\n");
-        }
+
+         printWinnerPlayerVsComputer(player1,computer);
 
         printf("1: Play Again\n2: Main Menu\n");
         scanf("%d", &response);
@@ -350,20 +357,8 @@ void player_vs_player(){
             take_player_turn(rows,columns,array, &player2 );
             draw_board(rows,columns,array, player1, player2);
         }
-        //print_winner();
-        if(player1.score>player2.score){
-            printf("You Won! Congrats ");
-            fputs(player1.name,stdout);
-            printf(".\n");
-        }
-        else if (player1.score<player2.score){
-            printf("You Won! Congrats ");
-            fputs(player2.name,stdout);
-            printf(".\n");
-        }
-        else{
-            printf("Draw.\n");
-        }
+
+        printWinnerPlayerVsPlayer(player1,player2);
 
         printf("1: Play Again\n2: Main Menu\n");
         scanf("%d", &response);
@@ -376,3 +371,58 @@ void player_vs_player(){
         }
     }while(response);
 }
+
+
+void printWinnerPlayerVsComputer(Player player1,Player computer){
+    if (player1.score>computer.score){
+            red();
+            printf("WINNER! Great Job ");
+            fputs(player1.name,stdout);
+            printf(".\n");
+            reset();
+        }
+        else if (player1.score<computer.score){
+            yellow();
+            printf("You Lost. Hard luck. Have another try.\n");
+            reset();
+        }
+        else{
+            printf("Draw.\n");
+        }
+}
+
+
+void printWinnerPlayerVsPlayer(Player player1,Player player2){
+    if(player1.score>player2.score){
+            red();
+            printf("You Won! Congrats ");
+            fputs(player1.name,stdout);
+            printf(".\n");
+            reset();
+        }
+        else if (player1.score<player2.score){
+            yellow();
+            printf("You Won! Congrats ");
+            fputs(player2.name,stdout);
+            printf(".\n");
+            reset();
+        }
+        else{
+            printf("Draw.\n");
+        }
+
+}
+
+//color fn
+void red () {
+  printf("\033[1;31m");
+}
+
+void yellow (){
+  printf("\033[1;33m");
+}
+
+void reset () {
+  printf("\033[0m");
+}
+
