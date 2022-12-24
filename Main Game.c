@@ -14,6 +14,7 @@ typedef struct{
     int score;
     char name[257];
     char color;
+    int numbOfMoves;
 }Player;
 
 
@@ -42,35 +43,43 @@ int main(){
     do{
         system("cls");
         printf(" 1:Start a new game\n 2:Load a previous game\n 3:Quit\n");
-        int choice;
-        scanf("%d", &choice);
+        char choice;
+        scanf(" %c", &choice);
         switch(choice){
-            case 1:
+            case '1':
                 system("cls");
                 printf(" 1: One player\n 2: Two players\n 3: Back\n");
-                scanf("%d",&choice);
+                scanf(" %c",&choice);
                 switch(choice){
-                    case 1:
+                    case '1':
                         // Player v Computer
                         player_vs_computer();
                         break;
 
-                    case 2:
+                    case '2':
                         // Player v Player
                         player_vs_player();
                         break;
-                    case 3:
+                    case '3':
                         break;
                     default:
-                        printf("Invalid Input !\n");
+                        printf("Invalid Input ! A single digit is required.\n");
                 }
                 break;
 
-            case 2: /*extract from a file*/ break;
-            case 3: quit = 1; break;
+            case '2': /*extract from a file*/ break;
+            case '3': quit = 1; break;
             default: printf("Invalid Input !\n");
         }
-    }while(quit == 0);
+       }
+       /*else{
+        system("cls");
+        printf(" 1:Start a new game\n 2:Load a previous game\n 3:Quit\n");
+        scanf("%c", &choice);
+       }*/
+
+
+while(quit == 0);
 
 
     return 0;
@@ -157,7 +166,7 @@ void reset () {
 
 void print_names_and_scores(Player player){
     fputs(player.name,stdout);
-    printf(": %d", player.score);
+    printf(": Score= %d & Number of moves= %d", player.score,player.numbOfMoves);
 }
 
 void player_vs_computer(){
@@ -186,10 +195,12 @@ void player_vs_computer(){
         player1.name[strlen(player1.name) - 1]='\0';
         player1.color = PLAYER1;
         player1.score = 0;
+        player1.numbOfMoves=0;
 
         computer.name[0] = 'P'; computer.name[1] = 'C', computer.name[2] = '\0';
         computer.color = PLAYER2;
         computer.score = 0;
+        computer.numbOfMoves=0;
 
         clear_board(rows,columns,array);
         draw_board(rows,columns,array, player1, computer);
@@ -197,12 +208,15 @@ void player_vs_computer(){
 
 
         while( check_for_free_slots(rows,columns,array) ){
+            red();
             take_player_turn(rows,columns,array, &player1 );
+            reset();
+            player1.numbOfMoves++;
             draw_board(rows,columns,array, player1, computer);
 
             if(check_for_free_slots(rows,columns,array)== 0){ break; }
-
             takeComputerTurn(rows,columns,array, &computer );
+            computer.numbOfMoves++;
             draw_board(rows,columns,array, player1, computer);
         }
 
@@ -246,12 +260,14 @@ void player_vs_player(){
         player1.name[strlen(player1.name) - 1]='\0';
         player1.color = PLAYER1;
         player1.score = 0;
+        player1.numbOfMoves=0;
 
         printf("Enter Player 2 name: ");
         fgets(player2.name, 257, stdin);
         player2.name[strlen(player2.name) - 1]='\0';
         player2.color = PLAYER2;
         player2.score = 0;
+        player2.numbOfMoves=0;
 
         clear_board(rows,columns,array);
         draw_board(rows,columns,array, player1, player2);
@@ -259,13 +275,19 @@ void player_vs_player(){
 
 
         while( check_for_free_slots(rows,columns,array) ){
+            red();
             take_player_turn(rows,columns,array, &player1 );
+            reset();
+            player1.numbOfMoves++;
             draw_board(rows,columns,array, player1, player2);
 
             if(check_for_free_slots(rows,columns,array)== 0){ break; }
-
+            yellow();
             take_player_turn(rows,columns,array, &player2 );
+            reset();
+            player2.numbOfMoves++;
             draw_board(rows,columns,array, player1, player2);
+
         }
 
         printWinnerPlayerVsPlayer(player1,player2);
@@ -432,5 +454,20 @@ void printWinnerPlayerVsPlayer(Player player1,Player player2){
             printf("Draw.\n");
         }
 }
+
+/*int checkInt(char num[],MAX_SIZE){
+    int i,sum=0;
+    for(i=0;i<=strlen(num),i++){
+        if (isdigit(num[i])){
+            sum++;
+        }
+    }
+    if(sum==strlen(nym)){
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}*/
 
 
