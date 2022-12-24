@@ -9,6 +9,7 @@
 const char PLAYER1='X';
 const char PLAYER2='O';
 
+
 typedef struct{
     int score;
     char name[257];
@@ -18,17 +19,21 @@ typedef struct{
 
 void clear_board();
 void draw_board();
-void take_player_turn();
-void mainMenu();
-int check_if_valid_col();
-void takeComputerTurn();
-bool check_for_free_slots();
+void red ();
+void yellow ();
+void reset ();
 void print_names_and_scores();
-void check_scores();
 void player_vs_computer();
 void player_vs_player();
+void take_player_turn();
+void takeComputerTurn();
+int check_if_valid_col();
+void check_scores();
+bool check_for_free_slots();
 void printWinnerPlayerVsComputer();
 void printWinnerPlayerVsPlayer();
+
+
 
 int main(){
 
@@ -40,24 +45,26 @@ int main(){
         int choice;
         scanf("%d", &choice);
         switch(choice){
-            case 1: printf(" 1: One player\n 2: Two players\n 3: Back\n");
-                    scanf("%d",&choice);
-                    switch(choice){
-                        case 1:
-                            // Player v Computer
-                            player_vs_computer();
-                            break;
+            case 1:
+                system("cls");
+                printf(" 1: One player\n 2: Two players\n 3: Back\n");
+                scanf("%d",&choice);
+                switch(choice){
+                    case 1:
+                        // Player v Computer
+                        player_vs_computer();
+                        break;
 
-                        case 2:
-                            // Player v Player
-                            player_vs_player();
-                            break;
-                        case 3:
-                            break;
-                        default:
-                            printf("Invalid Input !\n");
-                    }
-                    break;
+                    case 2:
+                        // Player v Player
+                        player_vs_player();
+                        break;
+                    case 3:
+                        break;
+                    default:
+                        printf("Invalid Input !\n");
+                }
+                break;
 
             case 2: /*extract from a file*/ break;
             case 3: quit = 1; break;
@@ -65,12 +72,6 @@ int main(){
         }
     }while(quit == 0);
 
-
-
-    /*take_player_turn(rows,columns,array);
-    draw_board(rows,columns,array);
-    takeComputerTurn(rows,columns,array);
-    draw_board(rows,columns,array);*/
 
     return 0;
 }
@@ -92,9 +93,19 @@ void draw_board(int rows,int columns,char array[rows][columns], Player player1, 
     system("cls");
     printf("\tConnect Four\n");
     printf("\t");
-    print_names_and_scores(player1.name, player1.score);
+
+    red();
+    print_names_and_scores(player1);
+    reset();
+
     printf("\t\t");
-    print_names_and_scores(player2.name, player2.score); printf("\n");
+
+    yellow();
+    print_names_and_scores(player2);
+    reset();
+
+    printf("\n");
+
     int i,j;
     int header[columns];
     for(j=0;j<columns;j++){
@@ -130,128 +141,27 @@ void draw_board(int rows,int columns,char array[rows][columns], Player player1, 
     }
 }
 
-void take_player_turn(int rows,int columns,char array[rows][columns], Player *player){
-    int enteredCol;
-    while(1){
-        for (int i=0; i<strlen((*player).name); i++){
-        printf("%c", (*player).name[i]);
-        }
-        printf("'s turn, please enter col num: ");
-        scanf("%d", &enteredCol);
-        enteredCol--;
-        if( check_if_valid_col(rows, columns, array, enteredCol) ){
-            int i=0;
-            while(array[i][enteredCol] ==' ' && i<rows){
-                i++;
-            }
-            array[i-1][enteredCol]= (*player).color;
-            check_scores(rows, columns, array, i-1, enteredCol, &((*player).score) );
-            break;
-        }
-        else{
-            printf("Invalid Input !\n");
-        }
-        }
-    }
-
-
-void takeComputerTurn(int rows,int columns,char array[rows][columns], Player *computer){
-    srand(time(0));
-    int i,j;
-        do{
-           j= rand()%columns;
-        }
-        while(array[0][j]!=' ');
-        for(i=0;i<rows;i++){
-            if(array[i][j]!=' '){
-                break;
-            }
-        }
-
-    array[i-1][j]=(*computer).color;
-    check_scores(rows, columns, array, i-1, j, &((*computer).score) );
+//color fn
+void red () {
+  printf("\033[1;31m");
 }
 
-int check_if_valid_col(int rows,int columns,char array[rows][columns], int enteredCol){
-    if(enteredCol>=columns || enteredCol < 0){
-        return 0;
-    }
-    else if(array[0][enteredCol]== PLAYER1 || array[0][enteredCol]==PLAYER2 ){
-        return 0;
-    }
-    else{
-        return 1;
-    }
+void yellow (){
+  printf("\033[1;33m");
+}
+
+void reset () {
+  printf("\033[0m");
 }
 
 
-
-bool check_for_free_slots(int rows,int columns,char array[rows][columns]){
-    bool free = false;
-    for(int i=0; i<rows; i++){
-        for (int j=0; j<columns; j++){
-            if(array[i][j] == ' '){
-                return 1;
-            }
-        }
-    }
-    return free;
+void print_names_and_scores(Player player){
+    fputs(player.name,stdout);
+    printf(": %d", player.score);
 }
-
-void print_names_and_scores(char name[], int score){
-    for (int i=0; i<strlen(name); i++){
-        printf("%c", name[i]);
-    }
-    printf(": %d", score);
-}
-
-void check_scores(int rows,int columns,char array[rows][columns], int enteredRow, int enteredCol, int *playerScore){
-    //Check Horizontal
-    if(enteredCol<columns-3 && ( array[enteredRow][enteredCol]==array[enteredRow][enteredCol+1] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol+2] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol+3] ) ){
-        (*playerScore)++;
-    }
-
-    if(enteredCol>=3 && ( array[enteredRow][enteredCol]==array[enteredRow][enteredCol-1] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol-2] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol-3] ) ){
-        (*playerScore)++;
-    }
-
-    if(array[enteredRow][enteredCol]==array[enteredRow][enteredCol-1] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol+1] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol+2] ){
-        (*playerScore)++;
-    }
-
-    if(array[enteredRow][enteredCol]==array[enteredRow][enteredCol-1] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol-2] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol+1] ){
-        (*playerScore)++;
-    }
-
-
-    //Check Vertical
-    if(enteredRow<rows-3 && (array[enteredRow][enteredCol] == array[enteredRow+1][enteredCol] && array[enteredRow][enteredCol]==array[enteredRow+2][enteredCol] && array[enteredRow][enteredCol]==array[enteredRow+3][enteredCol])){
-        (*playerScore)++;
-    }
-
-    //Check Diagonals
-    if(enteredCol<columns-3){
-        if(enteredRow<rows-3 && ( array[enteredRow][enteredCol]==array[enteredRow+1][enteredCol+1] && array[enteredRow][enteredCol]==array[enteredRow+2][enteredCol+2] && array[enteredRow][enteredCol]==array[enteredRow+3][enteredCol+3] )){
-            (*playerScore)++;
-        }
-        if(enteredRow>=3 && ( array[enteredRow][enteredCol]==array[enteredRow-1][enteredCol+1] && array[enteredRow][enteredCol]==array[enteredRow-2][enteredCol+2] && array[enteredRow][enteredCol]==array[enteredRow-3][enteredCol+3] )){
-            (*playerScore)++;
-        }
-    }
-    if(enteredCol>=3){
-        if(enteredRow<rows-3 && ( array[enteredRow][enteredCol]==array[enteredRow+1][enteredCol-1] && array[enteredRow][enteredCol]==array[enteredRow+2][enteredCol-2] && array[enteredRow][enteredCol]==array[enteredRow+3][enteredCol-3] )){
-            (*playerScore)++;
-        }
-        if(enteredRow>=3 && ( array[enteredRow][enteredCol]==array[enteredRow-1][enteredCol-1] && array[enteredRow][enteredCol]==array[enteredRow-2][enteredCol-2] && array[enteredRow][enteredCol]==array[enteredRow-3][enteredCol-3] )){
-            (*playerScore)++;
-        }
-    }
-}
-
-//if( array[enteredRow][enteredCol]==array[enteredRow][enteredCol] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol] )
-
 
 void player_vs_computer(){
+    system("cls");
     int response = 1;
     do{
         int rows,columns;
@@ -296,7 +206,7 @@ void player_vs_computer(){
             draw_board(rows,columns,array, player1, computer);
         }
 
-         printWinnerPlayerVsComputer(player1,computer);
+        printWinnerPlayerVsComputer(player1,computer);
 
         printf("1: Play Again\n2: Main Menu\n");
         scanf("%d", &response);
@@ -310,8 +220,8 @@ void player_vs_computer(){
     }while(response);
 }
 
-
 void player_vs_player(){
+    system("cls");
     int response = 1;
     do{
         int rows,columns;
@@ -373,10 +283,123 @@ void player_vs_player(){
 }
 
 
+void take_player_turn(int rows,int columns,char array[rows][columns], Player *player){
+    int enteredCol;
+    while(1){
+        for (int i=0; i<strlen((*player).name); i++){
+        printf("%c", (*player).name[i]);
+        }
+        printf("'s turn, please enter col num: ");
+        scanf("%d", &enteredCol);
+        enteredCol--;
+        if( check_if_valid_col(rows, columns, array, enteredCol) ){
+            int i=0;
+            while(array[i][enteredCol] ==' ' && i<rows){
+                i++;
+            }
+            array[i-1][enteredCol]= (*player).color;
+            check_scores(rows, columns, array, i-1, enteredCol, &((*player).score) );
+            break;
+        }
+        else{
+            printf("Invalid Input !\n");
+        }
+        }
+    }
+
+
+void takeComputerTurn(int rows,int columns,char array[rows][columns], Player *computer){
+    srand(time(0));
+    int i,j;
+        do{
+           j= rand()%columns;
+        }
+        while(array[0][j]!=' ');
+        for(i=0;i<rows;i++){
+            if(array[i][j]!=' '){
+                break;
+            }
+        }
+
+    array[i-1][j]=(*computer).color;
+    check_scores(rows, columns, array, i-1, j, &((*computer).score) );
+}
+
+int check_if_valid_col(int rows,int columns,char array[rows][columns], int enteredCol){
+    if(enteredCol>=columns || enteredCol < 0){
+        return 0;
+    }
+    else if(array[0][enteredCol]== PLAYER1 || array[0][enteredCol]==PLAYER2 ){
+        return 0;
+    }
+    else{
+        return 1;
+    }
+}
+
+void check_scores(int rows,int columns,char array[rows][columns], int enteredRow, int enteredCol, int *playerScore){
+    //Check Horizontal
+    if(enteredCol<columns-3 && ( array[enteredRow][enteredCol]==array[enteredRow][enteredCol+1] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol+2] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol+3] ) ){
+        (*playerScore)++;
+    }
+
+    if(enteredCol>=3 && ( array[enteredRow][enteredCol]==array[enteredRow][enteredCol-1] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol-2] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol-3] ) ){
+        (*playerScore)++;
+    }
+
+    if(array[enteredRow][enteredCol]==array[enteredRow][enteredCol-1] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol+1] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol+2] ){
+        (*playerScore)++;
+    }
+
+    if(array[enteredRow][enteredCol]==array[enteredRow][enteredCol-1] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol-2] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol+1] ){
+        (*playerScore)++;
+    }
+
+
+    //Check Vertical
+    if(enteredRow<rows-3 && (array[enteredRow][enteredCol] == array[enteredRow+1][enteredCol] && array[enteredRow][enteredCol]==array[enteredRow+2][enteredCol] && array[enteredRow][enteredCol]==array[enteredRow+3][enteredCol])){
+        (*playerScore)++;
+    }
+
+    //Check Diagonals
+    if(enteredCol<columns-3){
+        if(enteredRow<rows-3 && ( array[enteredRow][enteredCol]==array[enteredRow+1][enteredCol+1] && array[enteredRow][enteredCol]==array[enteredRow+2][enteredCol+2] && array[enteredRow][enteredCol]==array[enteredRow+3][enteredCol+3] )){
+            (*playerScore)++;
+        }
+        if(enteredRow>=3 && ( array[enteredRow][enteredCol]==array[enteredRow-1][enteredCol+1] && array[enteredRow][enteredCol]==array[enteredRow-2][enteredCol+2] && array[enteredRow][enteredCol]==array[enteredRow-3][enteredCol+3] )){
+            (*playerScore)++;
+        }
+    }
+    if(enteredCol>=3){
+        if(enteredRow<rows-3 && ( array[enteredRow][enteredCol]==array[enteredRow+1][enteredCol-1] && array[enteredRow][enteredCol]==array[enteredRow+2][enteredCol-2] && array[enteredRow][enteredCol]==array[enteredRow+3][enteredCol-3] )){
+            (*playerScore)++;
+        }
+        if(enteredRow>=3 && ( array[enteredRow][enteredCol]==array[enteredRow-1][enteredCol-1] && array[enteredRow][enteredCol]==array[enteredRow-2][enteredCol-2] && array[enteredRow][enteredCol]==array[enteredRow-3][enteredCol-3] )){
+            (*playerScore)++;
+        }
+    }
+
+//if( array[enteredRow][enteredCol]==array[enteredRow][enteredCol] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol] )
+}
+
+
+bool check_for_free_slots(int rows,int columns,char array[rows][columns]){
+    bool free = false;
+    for(int i=0; i<rows; i++){
+        for (int j=0; j<columns; j++){
+            if(array[i][j] == ' '){
+                return 1;
+            }
+        }
+    }
+    return free;
+}
+
+
 void printWinnerPlayerVsComputer(Player player1,Player computer){
     if (player1.score>computer.score){
             red();
-            printf("WINNER! Great Job ");
+            printf("WINNER! Great job, ");
             fputs(player1.name,stdout);
             printf(".\n");
             reset();
@@ -395,34 +418,19 @@ void printWinnerPlayerVsComputer(Player player1,Player computer){
 void printWinnerPlayerVsPlayer(Player player1,Player player2){
     if(player1.score>player2.score){
             red();
-            printf("You Won! Congrats ");
             fputs(player1.name,stdout);
-            printf(".\n");
+            printf(" Wins! Congrats !\n");
             reset();
         }
         else if (player1.score<player2.score){
             yellow();
-            printf("You Won! Congrats ");
             fputs(player2.name,stdout);
-            printf(".\n");
+            printf(" Wins! Congrats !\n");
             reset();
         }
         else{
             printf("Draw.\n");
         }
-
 }
 
-//color fn
-void red () {
-  printf("\033[1;31m");
-}
-
-void yellow (){
-  printf("\033[1;33m");
-}
-
-void reset () {
-  printf("\033[0m");
-}
 
