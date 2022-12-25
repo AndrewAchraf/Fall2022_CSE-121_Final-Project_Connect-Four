@@ -5,6 +5,7 @@
 #include <MMsystem.h>
 #include <stdbool.h>
 #include <string.h>
+#include<time.h>
 #define MAX_MOVES 10000
 
 const char PLAYER1='X';
@@ -18,10 +19,18 @@ typedef struct{
 }Player;
 
 typedef struct{
+    time_t start;
+    time_t end;
+    double diff;
+    int hrs,mins,secs;
+}Time;
+
+typedef struct{
     char board[100][100];
     Player plr1;
     Player plr2;
 }State;
+
 
 State Timeline[MAX_MOVES];
 int stateIndex= -1;
@@ -38,7 +47,7 @@ void player_vs_computer();
 void player_vs_player();
 void take_player_turn();
 void takeComputerTurn();
-int check_if_valid_col();
+int  check_if_valid_col();
 void check_scores();
 bool check_for_free_slots();
 void printWinnerPlayerVsComputer();
@@ -112,7 +121,7 @@ void clear_board(int rows,int columns,char array[rows][columns]){
 }
 
 
-void draw_board(int rows,int columns,char array[rows][columns], Player player1, Player player2){
+void draw_board(int rows,int columns,char array[rows][columns], Player player1, Player player2, Time timeTaken){
     system("cls");
     printf("\tConnect Four\n");
     printf("\t");
@@ -128,6 +137,11 @@ void draw_board(int rows,int columns,char array[rows][columns], Player player1, 
     reset();
 
     printf("\n");
+    timeTaken.diff=difftime(timeTaken.end,timeTaken.start);
+    timeTaken.hrs=(timeTaken.diff/(60*60));
+    timeTaken.mins=((int)timeTaken.diff%(60*60))/60;
+    timeTaken.secs=((int)timeTaken.diff%(60*60))%60;
+    printf("\n\t\tTime: %d hours : %d minutes : %d seconds\n\n",timeTaken.hrs,timeTaken.mins,timeTaken.secs);
 
     int i,j;
     int header[columns];
@@ -216,22 +230,27 @@ void player_vs_computer(){
         computer.score = 0;
         computer.numbOfMoves=0;
 
+        Time timeTaken;
         clear_board(rows,columns,array);
-        draw_board(rows,columns,array, player1, computer);
+        timeTaken.start=time(NULL);
+        timeTaken.end=time(NULL);
+        draw_board(rows,columns,array, player1, computer, timeTaken);
 
-
+        timeTaken.start=time(NULL);
 
         while( check_for_free_slots(rows,columns,array) ){
             red();
             take_player_turn(rows,columns,array, &player1 );
             reset();
             player1.numbOfMoves++;
-            draw_board(rows,columns,array, player1, computer);
+            timeTaken.end=time(NULL);
+            draw_board(rows,columns,array, player1, computer,timeTaken);
 
             if(check_for_free_slots(rows,columns,array)== 0){ break; }
             takeComputerTurn(rows,columns,array, &computer );
             computer.numbOfMoves++;
-            draw_board(rows,columns,array, player1, computer);
+            timeTaken.end=time(NULL);
+            draw_board(rows,columns,array, player1, computer,timeTaken);
         }
 
         printWinnerPlayerVsComputer(player1,computer);
@@ -286,22 +305,27 @@ void player_vs_player(){
 
         clear_board(rows,columns,array);
         save_state(rows,columns,array, player1, player2);
-        draw_board(rows,columns,array, player1, player2);
+        Time timeTaken;
+        timeTaken.start=time(NULL);
+        timeTaken.end=time(NULL);
+        draw_board(rows,columns,array, player1, player2,timeTaken);
 
-
+        timeTaken.start=time(NULL);
 
         while( check_for_free_slots(rows,columns,array) ){
             red();
             take_player_turn(rows,columns,array, &player1, &player2);
             reset();
-            draw_board(rows,columns,array, player1, player2);
+            timeTaken.end=time(NULL);
+            draw_board(rows,columns,array, player1, player2, timeTaken);
 
             if(check_for_free_slots(rows,columns,array)== 0){ break; }
 
             yellow();
             take_player_turn(rows,columns,array, &player2, &player1);
             reset();
-            draw_board(rows,columns,array, player1, player2);
+            timeTaken.end=time(NULL);
+            draw_board(rows,columns,array, player1, player2, timeTaken);
         }
 
         printWinnerPlayerVsPlayer(player1,player2);
@@ -573,5 +597,3 @@ void redo(int rows,int columns,char array[rows][columns], Player *p1, Player *p2
         return 0;
     }
 }*/
-
-
