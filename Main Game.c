@@ -6,7 +6,6 @@
 #include <stdbool.h>
 #include <string.h>
 #include<time.h>
-#define MAX_MOVES 10000
 
 const char PLAYER1='X';
 const char PLAYER2='O';
@@ -32,7 +31,6 @@ typedef struct{
 }State;
 
 
-State Timeline[MAX_MOVES];
 int stateIndex= -1;
 int maxRedo;
 char gameMode;
@@ -217,6 +215,7 @@ void player_vs_computer(){
         }
 
         char array[rows][columns];
+        State Timeline[rows*columns];
 
         Player player1;
         Player computer;
@@ -235,7 +234,7 @@ void player_vs_computer(){
 
         Time timeTaken;
         clear_board(rows,columns,array);
-        save_state(rows,columns,array, player1, computer);
+        save_state(rows,columns,array, player1, computer, Timeline);
         timeTaken.start=time(NULL);
         timeTaken.end=time(NULL);
         draw_board(rows,columns,array, player1, computer, timeTaken);
@@ -244,15 +243,15 @@ void player_vs_computer(){
 
         while( check_for_free_slots(rows,columns,array) ){
             red();
-            take_player_turn(rows,columns,array, &player1, &computer, &timeTaken);
+            take_player_turn(rows,columns,array, &player1, &computer, &timeTaken, Timeline);
             reset();
             timeTaken.end=time(NULL);
-            draw_board(rows,columns,array, player1, computer,timeTaken);
+            draw_board(rows,columns,array, player1, computer, timeTaken);
 
             if(check_for_free_slots(rows,columns,array)== 0){ break; }
-            takeComputerTurn(rows,columns,array, &computer, &player1, &timeTaken);
+            takeComputerTurn(rows,columns,array, &computer, &player1, Timeline);
             timeTaken.end=time(NULL);
-            draw_board(rows,columns,array, player1, computer,timeTaken);
+            draw_board(rows,columns,array, player1, computer, timeTaken);
         }
 
         printWinnerPlayerVsComputer(player1,computer);
@@ -287,6 +286,7 @@ void player_vs_player(){
         }
 
         char array[rows][columns];
+        State Timeline[rows*columns];
 
         Player player1;
         Player player2;
@@ -307,7 +307,7 @@ void player_vs_player(){
 
 
         clear_board(rows,columns,array);
-        save_state(rows,columns,array, player1, player2);
+        save_state(rows,columns,array, player1, player2, Timeline);
         Time timeTaken;
         timeTaken.start=time(NULL);
         timeTaken.end=time(NULL);
@@ -317,7 +317,7 @@ void player_vs_player(){
 
         while( check_for_free_slots(rows,columns,array) ){
             red();
-            take_player_turn(rows,columns,array, &player1, &player2);
+            take_player_turn(rows,columns,array, &player1, &player2, &timeTaken, Timeline);
             reset();
             timeTaken.end=time(NULL);
             draw_board(rows,columns,array, player1, player2, timeTaken);
@@ -325,7 +325,7 @@ void player_vs_player(){
             if(check_for_free_slots(rows,columns,array)== 0){ break; }
 
             yellow();
-            take_player_turn(rows,columns,array, &player2, &player1);
+            take_player_turn(rows,columns,array, &player2, &player1, &timeTaken, Timeline);
             reset();
             timeTaken.end=time(NULL);
             draw_board(rows,columns,array, player1, player2, timeTaken);
@@ -346,7 +346,7 @@ void player_vs_player(){
 }
 
 
-void take_player_turn(int rows,int columns,char array[rows][columns], Player *player1, Player *player2, Time *timeTaken){
+void take_player_turn(int rows,int columns,char array[rows][columns], Player *player1, Player *player2, Time *timeTaken, State Timeline[rows*columns] ){
     char colDesired[100];
     long int enteredCol;
     double floatCol;
@@ -359,11 +359,11 @@ void take_player_turn(int rows,int columns,char array[rows][columns], Player *pl
            scanf("%s", colDesired);
            enteredCol=atol(colDesired);
            floatCol=atof(colDesired);
-           if (enteredCol==0 || (double)enteredCol!=floatCol){
+           if (enteredCol < -2 || (double)enteredCol!=floatCol){
             printf("Invalid Input. You have to enter an Integer\n");
            }
         }
-        while(enteredCol==0 || (double)enteredCol!=floatCol);
+        while(enteredCol < -2 || (double)enteredCol!=floatCol);
         enteredCol--;
         if( check_if_valid_col(rows, columns, array, enteredCol) == 1){
             int i=0;
@@ -375,10 +375,10 @@ void take_player_turn(int rows,int columns,char array[rows][columns], Player *pl
             check_scores(rows, columns, array, i-1, enteredCol, &((*player1).score) );
             if(gameMode == 't'){
                 if( (*player1).color == PLAYER1 ){
-                save_state(rows,columns,array, *player1, *player2);
+                    save_state(rows,columns,array, *player1, *player2, Timeline);
                 }
                 else{
-                    save_state(rows,columns,array, *player2, *player1);
+                    save_state(rows,columns,array, *player2, *player1, Timeline);
                 }
             }
 
@@ -388,7 +388,7 @@ void take_player_turn(int rows,int columns,char array[rows][columns], Player *pl
         else if( check_if_valid_col(rows, columns, array, enteredCol) == 2 ){   //Perform Undo
             if(stateIndex > 0){
                 if( (*player1).color == PLAYER1 ){
-                    undo( rows, columns, array, &(*player1), &(*player2) );
+                    undo( rows, columns, array, &(*player1), &(*player2), Timeline);
                     if(gameMode == 't'){
                         break;
                     }
@@ -398,7 +398,7 @@ void take_player_turn(int rows,int columns,char array[rows][columns], Player *pl
                     }
                 }
                 else{
-                    undo( rows, columns, array, &(*player2), &(*player1) );
+                    undo( rows, columns, array, &(*player2), &(*player1), Timeline);
                     if(gameMode == 't'){
                         break;
                     }
@@ -416,7 +416,7 @@ void take_player_turn(int rows,int columns,char array[rows][columns], Player *pl
         else if( check_if_valid_col(rows, columns, array, enteredCol) == 3 ){       //Perform Redo
             if(stateIndex < maxRedo){
                 if( (*player1).color == PLAYER1 ){
-                    redo( rows, columns, array, &(*player1), &(*player2) );
+                    redo( rows, columns, array, &(*player1), &(*player2), Timeline);
                     if(gameMode == 't'){
                         break;
                     }
@@ -426,7 +426,7 @@ void take_player_turn(int rows,int columns,char array[rows][columns], Player *pl
                     }
                 }
                 else{
-                    redo( rows, columns, array, &(*player2), &(*player1) );
+                    redo( rows, columns, array, &(*player2), &(*player1), Timeline);
                     if(gameMode == 't'){
                         break;
                     }
@@ -448,7 +448,7 @@ void take_player_turn(int rows,int columns,char array[rows][columns], Player *pl
     }
 
 
-void takeComputerTurn(int rows,int columns,char array[rows][columns], Player *computer, Player *player){
+void takeComputerTurn(int rows,int columns,char array[rows][columns], Player *computer, Player *player, State Timeline[rows*columns] ){
     srand(time(0));
     int i,j;
         do{
@@ -464,7 +464,7 @@ void takeComputerTurn(int rows,int columns,char array[rows][columns], Player *co
     array[i-1][j]=(*computer).color;
     (*computer).numbOfMoves++;
     check_scores(rows, columns, array, i-1, j, &((*computer).score) );
-    save_state(rows,columns,array, *player, *computer);
+    save_state(rows,columns,array, *player, *computer, Timeline);
     maxRedo = stateIndex;
 }
 
@@ -583,8 +583,8 @@ void printWinnerPlayerVsPlayer(Player player1,Player player2){
         }
 }
 
-void save_state(int rows, int columns, char array[rows][columns], Player p1, Player p2){
-    if(stateIndex < MAX_MOVES-1){
+void save_state(int rows, int columns, char array[rows][columns], Player p1, Player p2, State Timeline[rows*columns]){
+    if(stateIndex < (rows*columns)-1){
         stateIndex += 1;
         for (int i=0; i<rows; i++){
             for(int j=0; j<columns; j++){
@@ -599,7 +599,7 @@ void save_state(int rows, int columns, char array[rows][columns], Player p1, Pla
     }
 }
 
-void undo(int rows,int columns,char array[rows][columns], Player *p1, Player *p2){
+void undo(int rows,int columns,char array[rows][columns], Player *p1, Player *p2, State Timeline[rows*columns]){
     if(stateIndex > 0){ stateIndex -= 1 ; }
     //if(stateIndex > 1 && gameMode == 'o'){ stateIndex -= 2 ; }
 
@@ -615,7 +615,7 @@ void undo(int rows,int columns,char array[rows][columns], Player *p1, Player *p2
     ((*p2).numbOfMoves) = Timeline[stateIndex].plr2.numbOfMoves;
 }
 
-void redo(int rows,int columns,char array[rows][columns], Player *p1, Player *p2){
+void redo(int rows,int columns,char array[rows][columns], Player *p1, Player *p2, State Timeline[rows*columns]){
     if(stateIndex < maxRedo){ stateIndex += 1 ; }
 
     for (int i=0; i<rows; i++){
