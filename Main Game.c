@@ -500,11 +500,11 @@ void check_scores(int rows,int columns,char array[rows][columns], int enteredRow
         (*playerScore)++;
     }
 
-    if(array[enteredRow][enteredCol]==array[enteredRow][enteredCol-1] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol+1] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol+2] ){
+    if(enteredCol<=columns-3 && enteredCol>0 && array[enteredRow][enteredCol]==array[enteredRow][enteredCol-1] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol+1] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol+2] ){
         (*playerScore)++;
     }
 
-    if(array[enteredRow][enteredCol]==array[enteredRow][enteredCol-1] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol-2] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol+1] ){
+    if(enteredCol<=columns-2 && enteredCol>1 && array[enteredRow][enteredCol]==array[enteredRow][enteredCol-1] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol-2] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol+1] ){
         (*playerScore)++;
     }
 
@@ -516,19 +516,61 @@ void check_scores(int rows,int columns,char array[rows][columns], int enteredRow
 
     //Check Diagonals
     if(enteredCol<columns-3){
-       if(enteredRow<rows-3 && ( ( array[enteredRow][enteredCol]==array[enteredRow+1][enteredCol+1] && array[enteredRow][enteredCol]==array[enteredRow+2][enteredCol+2] && array[enteredRow][enteredCol]==array[enteredRow+3][enteredCol+3] )
-           || ( array[enteredRow][enteredCol]==array[enteredRow+1][enteredCol+1] && array[enteredRow][enteredCol]==array[enteredRow+2][enteredCol+2] && array[enteredRow][enteredCol]==array[enteredRow-1][enteredCol-1] ) ) ){
+       if(enteredRow<=rows-3 && (( array[enteredRow][enteredCol]==array[enteredRow+1][enteredCol+1] && array[enteredRow][enteredCol]==array[enteredRow+2][enteredCol+2] && array[enteredRow][enteredCol]==array[enteredRow+3][enteredCol+3] )) ){
+            (*playerScore)++;
+        }
+         if(enteredRow<=rows-3 &&  ( array[enteredRow][enteredCol]==array[enteredRow+1][enteredCol+1] && array[enteredRow][enteredCol]==array[enteredRow+2][enteredCol+2] && array[enteredRow][enteredCol]==array[enteredRow-1][enteredCol-1] )){
+            (*playerScore)++;
+        }
+         if(enteredRow<=rows-3 && enteredCol>1 && ( array[enteredRow][enteredCol]==array[enteredRow+1][enteredCol+1] && array[enteredRow][enteredCol]==array[enteredRow-2][enteredCol-2] && array[enteredRow][enteredCol]==array[enteredRow-1][enteredCol-1] )){
+            (*playerScore)++;
+        }
+        if(enteredRow<=rows-3 && enteredCol>0 && ( array[enteredRow][enteredCol]==array[enteredRow+1][enteredCol-1] && array[enteredRow][enteredCol]==array[enteredRow-1][enteredCol+1] && array[enteredRow][enteredCol]==array[enteredRow-2][enteredCol+2] )){
             (*playerScore)++;
         }
         if(enteredRow>=3 && ( array[enteredRow][enteredCol]==array[enteredRow-1][enteredCol+1] && array[enteredRow][enteredCol]==array[enteredRow-2][enteredCol+2] && array[enteredRow][enteredCol]==array[enteredRow-3][enteredCol+3] )){
             (*playerScore)++;
         }
+         if(enteredRow>=3 && enteredCol>1 && enteredRow<rows-2 && ( array[enteredRow][enteredCol]==array[enteredRow-1][enteredCol+1] && array[enteredRow][enteredCol]==array[enteredRow+1][enteredCol-1] && array[enteredRow][enteredCol]==array[enteredRow+2][enteredCol-2] )){
+            (*playerScore)++;
+        }
+         if(enteredRow>=3 && enteredCol>0 && enteredRow<rows-1 && ( array[enteredRow][enteredCol]==array[enteredRow-1][enteredCol+1] && array[enteredRow][enteredCol]==array[enteredRow-2][enteredCol+2] && array[enteredRow][enteredCol]==array[enteredRow+1][enteredCol-1] )){
+            (*playerScore)++;
+        }
+        if(enteredRow>=3 && enteredCol>1 && enteredRow<rows-1 && ( array[enteredRow][enteredCol]==array[enteredRow-1][enteredCol-1] && array[enteredRow][enteredCol]==array[enteredRow+1][enteredCol+1] && array[enteredRow][enteredCol]==array[enteredRow-2][enteredCol-2] )){
+            (*playerScore)++;
+        }
+
     }
     if(enteredCol>=3){
         if(enteredRow<rows-3 && ( array[enteredRow][enteredCol]==array[enteredRow+1][enteredCol-1] && array[enteredRow][enteredCol]==array[enteredRow+2][enteredCol-2] && array[enteredRow][enteredCol]==array[enteredRow+3][enteredCol-3] )){
             (*playerScore)++;
         }
+        if(enteredRow<rows-3 && enteredCol<columns-1 && enteredRow>0 && ( array[enteredRow][enteredCol]==array[enteredRow+1][enteredCol-1] && array[enteredRow][enteredCol]==array[enteredRow+2][enteredCol-2] && array[enteredRow][enteredCol]==array[enteredRow-1][enteredCol+1] )){
+            (*playerScore)++;
+        }
+        if(enteredRow<rows-3 && enteredCol<columns-1 && enteredRow>1 && ( array[enteredRow][enteredCol]==array[enteredRow+1][enteredCol+1] && array[enteredRow][enteredCol]==array[enteredRow-2][enteredCol-2] && array[enteredRow][enteredCol]==array[enteredRow-1][enteredCol-1] )){
+            (*playerScore)++;
+        }
+        if(enteredRow<rows-3 && enteredCol<columns-2 && enteredRow>2 && ( array[enteredRow][enteredCol]==array[enteredRow+1][enteredCol-1] && array[enteredRow][enteredCol]==array[enteredRow-2][enteredCol+2] && array[enteredRow][enteredCol]==array[enteredRow-1][enteredCol+1] )){
+            (*playerScore)++;
+        }
+        if(enteredRow<rows-3 && enteredCol<columns-1 && enteredRow>0 && ( array[enteredRow][enteredCol]==array[enteredRow-1][enteredCol-1] && array[enteredRow][enteredCol]==array[enteredRow+2][enteredCol+2] && array[enteredRow][enteredCol]==array[enteredRow+1][enteredCol+1] )){
+            (*playerScore)++;
+        }
         if(enteredRow>=3 && ( array[enteredRow][enteredCol]==array[enteredRow-1][enteredCol-1] && array[enteredRow][enteredCol]==array[enteredRow-2][enteredCol-2] && array[enteredRow][enteredCol]==array[enteredRow-3][enteredCol-3] )){
+            (*playerScore)++;
+        }
+        if(enteredRow>=3 && enteredCol<columns-1 && ( array[enteredRow][enteredCol]==array[enteredRow-1][enteredCol-1] && array[enteredRow][enteredCol]==array[enteredRow-2][enteredCol-2] && array[enteredRow][enteredCol]==array[enteredRow+1][enteredCol+1] )){
+            (*playerScore)++;
+        }
+         if(enteredRow>=3 && enteredCol<columns-2 && ( array[enteredRow][enteredCol]==array[enteredRow-1][enteredCol-1] && array[enteredRow][enteredCol]==array[enteredRow+2][enteredCol+2] && array[enteredRow][enteredCol]==array[enteredRow+1][enteredCol+1] )){
+            (*playerScore)++;
+        }
+        if(enteredRow>=3 && enteredCol<columns-2 && ( array[enteredRow][enteredCol]==array[enteredRow-1][enteredCol+1] && array[enteredRow][enteredCol]==array[enteredRow-2][enteredCol+2] && array[enteredRow][enteredCol]==array[enteredRow+1][enteredCol-1] )){
+            (*playerScore)++;
+        }
+        if(enteredRow>=3 && enteredCol<columns-1 && ( array[enteredRow][enteredCol]==array[enteredRow-1][enteredCol+1] && array[enteredRow][enteredCol]==array[enteredRow+2][enteredCol-2] && array[enteredRow][enteredCol]==array[enteredRow+1][enteredCol-1] )){
             (*playerScore)++;
         }
     }
