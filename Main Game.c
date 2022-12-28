@@ -359,11 +359,11 @@ void take_player_turn(int rows,int columns,char array[rows][columns], Player *pl
            scanf("%s", colDesired);
            enteredCol=atol(colDesired);
            floatCol=atof(colDesired);
-           if (enteredCol < -2 || (double)enteredCol!=floatCol){
+           if (enteredCol == 0 || (double)enteredCol!=floatCol){
             printf("Invalid Input. You have to enter an Integer\n");
            }
         }
-        while(enteredCol < -2 || (double)enteredCol!=floatCol);
+        while(enteredCol == 0 || (double)enteredCol!=floatCol);
         enteredCol--;
         if( check_if_valid_col(rows, columns, array, enteredCol) == 1){
             int i=0;
