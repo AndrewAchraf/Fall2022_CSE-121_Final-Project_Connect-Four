@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include<time.h>
+#include<ctype.h>
 #define MAX_MOVES 10000
 
 const char PLAYER1='X';
@@ -70,6 +71,8 @@ int main(){
         char choice;
         scanf(" %c", &choice);
 
+
+        if(choice=='1' || choice=='2' || choice=='3' ){
         switch(choice){
             case '1':
                 system("cls");
@@ -95,6 +98,7 @@ int main(){
             case '2': /*extract from a file*/ break;
             case '3': quit = 1; break;
             //default: printf("Invalid Input !\n");
+        }
         }
        }
        /*else{
@@ -355,15 +359,20 @@ void take_player_turn(int rows,int columns,char array[rows][columns], Player *pl
            for (int i=0; i<strlen((*player1).name); i++){
            printf("%c", (*player1).name[i]);
            }
-           printf("'s turn, please enter col num (0:Undo, -1:Redo, -2:Save and Exit) : ");
+           printf("'s turn, please enter col num (-1:Undo, -2:Redo, -3:Save and Exit, -4:Exit) : ");
            scanf("%s", colDesired);
            enteredCol=atol(colDesired);
            floatCol=atof(colDesired);
+
            if (enteredCol==0 || (double)enteredCol!=floatCol){
-            printf("Invalid Input. You have to enter an Integer\n");
+                printf("You should enter an integer\n");
+
            }
         }
         while(enteredCol==0 || (double)enteredCol!=floatCol);
+        if (enteredCol==-4){
+                exit(0);
+        }
         enteredCol--;
         if( check_if_valid_col(rows, columns, array, enteredCol) == 1){
             int i=0;
@@ -405,6 +414,7 @@ void take_player_turn(int rows,int columns,char array[rows][columns], Player *pl
                     else{
                         (*timeTaken).end=time(NULL);
                         draw_board(rows,columns,array, *player1, *player2, *timeTaken);
+
                     }
                 }
             }
@@ -476,10 +486,10 @@ int check_if_valid_col(int rows,int columns,char array[rows][columns], int enter
     else if(array[0][enteredCol]== PLAYER1 || array[0][enteredCol]==PLAYER2 ){
         return 0;
     }
-    else if (enteredCol == -1){
+    else if (enteredCol == -2){
         return 2;
     }
-    else if (enteredCol == -2){
+    else if (enteredCol == -3){
         return 3;
     }
     else{
@@ -513,7 +523,8 @@ void check_scores(int rows,int columns,char array[rows][columns], int enteredRow
 
     //Check Diagonals
     if(enteredCol<columns-3){
-        if(enteredRow<rows-3 && ( array[enteredRow][enteredCol]==array[enteredRow+1][enteredCol+1] && array[enteredRow][enteredCol]==array[enteredRow+2][enteredCol+2] && array[enteredRow][enteredCol]==array[enteredRow+3][enteredCol+3] )){
+        if(enteredRow<rows-3 && ( ( array[enteredRow][enteredCol]==array[enteredRow+1][enteredCol+1] && array[enteredRow][enteredCol]==array[enteredRow+2][enteredCol+2] && array[enteredRow][enteredCol]==array[enteredRow+3][enteredCol+3] )
+           || ( array[enteredRow][enteredCol]==array[enteredRow+1][enteredCol+1] && array[enteredRow][enteredCol]==array[enteredRow+2][enteredCol+2] && array[enteredRow][enteredCol]==array[enteredRow-1][enteredCol-1] ) ) ){
             (*playerScore)++;
         }
         if(enteredRow>=3 && ( array[enteredRow][enteredCol]==array[enteredRow-1][enteredCol+1] && array[enteredRow][enteredCol]==array[enteredRow-2][enteredCol+2] && array[enteredRow][enteredCol]==array[enteredRow-3][enteredCol+3] )){
