@@ -59,7 +59,7 @@ void redo();
 bool saveGame();
 //State *loadGame(char *filename);
 
-
+int xml();
 
 
 int main(){
@@ -220,7 +220,7 @@ void playerVsComputer(){
     gameMode = 'o';
     do{
         int rows,columns;
-        while(1){
+         /* while(1){
             printf("Enter the size of the grid: ");
             scanf("%d %d",&rows,&columns);
             if(rows<4 || columns<4){
@@ -229,8 +229,9 @@ void playerVsComputer(){
             else{
                 break;
             }
-        }
+        }*/
 
+        if(xml(&rows,&columns)){
         char array[rows][columns];
         State Timeline[rows*columns];
 
@@ -282,6 +283,10 @@ void playerVsComputer(){
                 response = 0;
                 break;
         }
+        }
+        else{
+            break;
+        }
     }while(response);
 }
 
@@ -291,7 +296,7 @@ void playerVsPlayer(){
     gameMode = 't';
     do{
         int rows,columns;
-        while(1){
+       /* while(1){
             printf("Enter the size of the grid: ");
             scanf("%d %d",&rows,&columns);
             if(rows<4 || columns<4){
@@ -300,8 +305,9 @@ void playerVsPlayer(){
             else{
                 break;
             }
-        }
+        }*/
 
+        if(xml(&rows,&columns)){
         char array[rows][columns];
         State Timeline[rows*columns];
 
@@ -358,6 +364,10 @@ void playerVsPlayer(){
             case 2:
                 response = 0;
                 break;
+        }
+        }
+        else{
+            break;
         }
     }while(response);
 }
@@ -741,6 +751,139 @@ bool saveGame(int gameSave, State *currentState){
 
     return true;
 }
+
+
+
+int xml(int *rows,int *columns){
+    int  highScores;
+    char y,x[500]= {'0'},conf1[]="<Configurations>",width1[]="<Width>",height1[]="<Height>",highscores1[]="<Highscores>";
+    char conf2[]="</Configurations>",width2[]="</Width>",height2[]="</Height>",highscores2[]="</Highscores>";
+    int i=0, len=0, fileCorrupted=0;
+    int j,k,l,m,n,q,h,s,r,f;
+    char height[256],width[256],scores[256];
+    FILE *file= fopen("project.xml", "r");
+
+    while((y=fgetc(file)) && y!=EOF){
+        if(y!=' '&&y!='\n'&&y!='\t'){
+            x[i]=y;
+            i++;
+            len++;
+        }
+    }
+    /*for(i=0;i<len;i++){
+        printf("%c",x[i]);
+    }*/
+
+    for(i=0; i<sizeof(conf1)-1; i++){
+        if(x[i]!=conf1[i]){
+            printf("FILE CORRUPTED!");
+            fileCorrupted=0;
+            break;
+        }
+    }
+
+    for(j=0;j<sizeof(height1)-1; j++){
+        if(x[i+j]!=height1[j]){
+            printf("FILE CORRUPTED!");
+            fileCorrupted=0;
+            break;
+        }
+    }
+    if (fileCorrupted==0){
+        for (k=0; k<sizeof(height)-1; k++){
+            if(isdigit(x[i+j+k])){
+                height[k]=x[i+j+k];
+            }
+            else{
+                break;
+            }
+        }
+    }
+    *rows=atoi(height);
+
+    for(l=0; l<sizeof(height2)-1; l++){
+        if(x[i+j+k+l]!=height2[l]){
+            printf("FILE CORRUPTED!");
+            fileCorrupted=1;
+            break;
+        }
+    }
+
+    for(m=0; m<sizeof(width1)-1; m++){
+        if(x[i+j+k+l+m]!=width1[m]){
+            printf("FILE CORRUPTED!\n");
+            fileCorrupted=1;
+            break;
+        }
+    }
+
+    if (fileCorrupted==0){
+        for (n=0; n<sizeof(width)-1; n++){
+            if(isdigit(x[i+j+k+l+m+n])){
+                width[n]=x[i+j+k+l+m+n];
+            }
+            else{
+                break;
+            }
+        }
+    }
+    *columns=atoi(width);
+
+
+    for(q=0; q<sizeof(width2)-1; q++){
+        if(x[i+j+k+l+m+n+q]!=width2[q]){
+            printf("FILE CORRUPTED!\n");
+            fileCorrupted=1;
+            break;
+        }
+    }
+
+    for(h=0; h<sizeof(highscores1)-1; h++){
+        if(x[i+j+k+l+m+n+q+h]!=highscores1[h]){
+            printf("FILE CORRUPTED!\n");
+            fileCorrupted=1;
+            break;
+        }
+    }
+
+    if (fileCorrupted==0){
+        for (s=0; s<sizeof(scores)-1; s++){
+            if(isdigit(x[i+j+k+l+m+n+q+h+s])){
+                scores[s]=x[i+j+k+l+m+n+q+h+s];
+            }
+            else{
+                break;
+            }
+        }
+    }
+    highScores=atoi(scores);
+
+    for(r=0; r<sizeof(highscores2)-1; r++){
+        if(x[i+j+k+l+m+n+q+h+s+r]!=highscores2[r]){
+            printf("FILE CORRUPTED!\n");
+            fileCorrupted=1;
+            break;
+        }
+    }
+    for(f=0; f<sizeof(conf2)-1; f++){
+        if(x[i+j+k+l+m+n+q+h+s+r+f]!=conf2[f]){
+            printf("FILE CORRUPTED!\n");
+            fileCorrupted=1;
+            break;
+        }
+    }
+
+    fclose(file);
+    if(fileCorrupted==0){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
+
+
+
 
 
 
