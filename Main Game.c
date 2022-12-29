@@ -36,32 +36,36 @@ int maxRedo;
 char gameMode;
 
 
-void clear_board();
-void draw_board();
-void red ();
-void yellow ();
-void reset ();
-void print_names_and_scores();
-void player_vs_computer();
-void player_vs_player();
-void take_player_turn();
+void clearBoard();
+void drawBoard();
+void red();
+void yellow();
+void reset();
+void printNamesAndScores();
+void playerVsComputer();
+void playerVsPlayer();
+void takePlayerTurn();
 void takeComputerTurn();
-int  check_if_valid_col();
-void check_scores();
-bool check_for_free_slots();
+int  checkIfValidInput();
+void checkScores();
+bool checkForFreeSlots();
 void printWinnerPlayerVsComputer();
 void printWinnerPlayerVsPlayer();
-void save_state();
+void saveState();
 void undo();
 void redo();
+
+
+bool saveGame();
+//State *loadGame(char *filename);
 
 
 
 
 int main(){
-
     // Main Menu
     int quit = 0;
+    //char newOrLoaded;
     do{
         system("cls");
         printf(" 1:Start a new game\n 2:Load a previous game\n 3:Quit\n");
@@ -73,15 +77,16 @@ int main(){
                 system("cls");
                 printf(" 1: One player\n 2: Two players\n 3: Back\n");
                 scanf(" %c",&choice);
+                //newOrLoaded = 'n';
                 switch(choice){
                     case '1':
                         // Player v Computer
-                        player_vs_computer();
+                        playerVsComputer();
                         break;
 
                     case '2':
                         // Player v Player
-                        player_vs_player();
+                        playerVsPlayer();
                         break;
                     case '3':
                         break;
@@ -90,7 +95,20 @@ int main(){
                 }
                 break;
 
-            case '2': /*extract from a file*/ break;
+            case '2':
+                system("cls");
+                int gameSave;
+                do{
+                    printf("Choose the file you would like to load:\n1:Game Save 1\n2:Game Save 2\n3:Game Save 3\n");
+                    scanf("%d", &gameSave);
+                    if(gameSave>=1 && gameSave<=3){
+                        break;
+                    }
+                    printf("You must enter an integer from 1 to 3\n");
+                }while( gameSave<1 || gameSave>3 );
+
+                 break;
+
             case '3': quit = 1; break;
             //default: printf("Invalid Input !\n");
         }
@@ -101,8 +119,7 @@ int main(){
         scanf("%c", &choice);
        }*/
 
-
-while(quit == 0);
+    while(quit == 0);
 
 
     return 0;
@@ -110,7 +127,7 @@ while(quit == 0);
 
 
 
-void clear_board(int rows,int columns,char array[rows][columns]){
+void clearBoard(int rows,int columns,char array[rows][columns]){
     int i,j;
     for (i=0; i<rows; i++){
         for(j=0; j<columns; j++){
@@ -121,19 +138,19 @@ void clear_board(int rows,int columns,char array[rows][columns]){
 }
 
 
-void draw_board(int rows,int columns,char array[rows][columns], Player player1, Player player2, Time timeTaken){
+void drawBoard(int rows,int columns,char array[rows][columns], Player player1, Player player2, Time timeTaken){
     system("cls");
     printf("\tConnect Four\n");
     printf("\t");
 
     red();
-    print_names_and_scores(player1);
+    printNamesAndScores(player1);
     reset();
 
     printf("\t\t");
 
     yellow();
-    print_names_and_scores(player2);
+    printNamesAndScores(player2);
     reset();
 
     printf("\n");
@@ -192,12 +209,12 @@ void reset () {
 }
 
 
-void print_names_and_scores(Player player){
+void printNamesAndScores(Player player){
     fputs(player.name,stdout);
     printf(": Score= %d & Number of moves= %d", player.score,player.numbOfMoves);
 }
 
-void player_vs_computer(){
+void playerVsComputer(){
     system("cls");
     int response = 1;
     gameMode = 'o';
@@ -227,31 +244,31 @@ void player_vs_computer(){
         player1.score = 0;
         player1.numbOfMoves=0;
 
-        computer.name[0] = 'P'; computer.name[1] = 'C', computer.name[2] = '\0';
+        strcpy(computer.name, "Computer");
         computer.color = PLAYER2;
         computer.score = 0;
         computer.numbOfMoves=0;
 
         Time timeTaken;
-        clear_board(rows,columns,array);
-        save_state(rows,columns,array, player1, computer, Timeline);
+        clearBoard(rows,columns,array);
+        saveState(rows,columns,array, player1, computer, Timeline);
         timeTaken.start=time(NULL);
         timeTaken.end=time(NULL);
-        draw_board(rows,columns,array, player1, computer, timeTaken);
+        drawBoard(rows,columns,array, player1, computer, timeTaken);
 
         timeTaken.start=time(NULL);
 
-        while( check_for_free_slots(rows,columns,array) ){
+        while( checkForFreeSlots(rows,columns,array) ){
             red();
-            take_player_turn(rows,columns,array, &player1, &computer, &timeTaken, Timeline);
+            takePlayerTurn(rows,columns,array, &player1, &computer, &timeTaken, Timeline);
             reset();
             timeTaken.end=time(NULL);
-            draw_board(rows,columns,array, player1, computer, timeTaken);
+            drawBoard(rows,columns,array, player1, computer, timeTaken);
 
-            if(check_for_free_slots(rows,columns,array)== 0){ break; }
+            if(checkForFreeSlots(rows,columns,array)== 0){ break; }
             takeComputerTurn(rows,columns,array, &computer, &player1, Timeline);
             timeTaken.end=time(NULL);
-            draw_board(rows,columns,array, player1, computer, timeTaken);
+            drawBoard(rows,columns,array, player1, computer, timeTaken);
         }
 
         printWinnerPlayerVsComputer(player1,computer);
@@ -268,7 +285,7 @@ void player_vs_computer(){
     }while(response);
 }
 
-void player_vs_player(){
+void playerVsPlayer(){
     system("cls");
     int response = 1;
     gameMode = 't';
@@ -306,29 +323,29 @@ void player_vs_player(){
         player2.numbOfMoves=0;
 
 
-        clear_board(rows,columns,array);
-        save_state(rows,columns,array, player1, player2, Timeline);
+        clearBoard(rows,columns,array);
+        saveState(rows,columns,array, player1, player2, Timeline);
         Time timeTaken;
         timeTaken.start=time(NULL);
         timeTaken.end=time(NULL);
-        draw_board(rows,columns,array, player1, player2,timeTaken);
+        drawBoard(rows,columns,array, player1, player2,timeTaken);
 
         timeTaken.start=time(NULL);
 
-        while( check_for_free_slots(rows,columns,array) ){
+        while( checkForFreeSlots(rows,columns,array) ){
             red();
-            take_player_turn(rows,columns,array, &player1, &player2, &timeTaken, Timeline);
+            takePlayerTurn(rows,columns,array, &player1, &player2, &timeTaken, Timeline);
             reset();
             timeTaken.end=time(NULL);
-            draw_board(rows,columns,array, player1, player2, timeTaken);
+            drawBoard(rows,columns,array, player1, player2, timeTaken);
 
-            if(check_for_free_slots(rows,columns,array)== 0){ break; }
+            if(checkForFreeSlots(rows,columns,array)== 0){ break; }
 
             yellow();
-            take_player_turn(rows,columns,array, &player2, &player1, &timeTaken, Timeline);
+            takePlayerTurn(rows,columns,array, &player2, &player1, &timeTaken, Timeline);
             reset();
             timeTaken.end=time(NULL);
-            draw_board(rows,columns,array, player1, player2, timeTaken);
+            drawBoard(rows,columns,array, player1, player2, timeTaken);
         }
 
         printWinnerPlayerVsPlayer(player1,player2);
@@ -346,7 +363,7 @@ void player_vs_player(){
 }
 
 
-void take_player_turn(int rows,int columns,char array[rows][columns], Player *player1, Player *player2, Time *timeTaken, State Timeline[rows*columns] ){
+void takePlayerTurn(int rows,int columns,char array[rows][columns], Player *player1, Player *player2, Time *timeTaken, State Timeline[rows*columns] ){
     char colDesired[100];
     long int enteredCol;
     double floatCol;
@@ -368,27 +385,27 @@ void take_player_turn(int rows,int columns,char array[rows][columns], Player *pl
                 exit(0);
         }
         enteredCol--;
-        if( check_if_valid_col(rows, columns, array, enteredCol) == 1){
+        if( checkIfValidInput(rows, columns, array, enteredCol) == 1){
             int i=0;
             while(array[i][enteredCol] ==' ' && i<rows){
                 i++;
             }
             array[i-1][enteredCol]= (*player1).color;
             (*player1).numbOfMoves++;
-            check_scores(rows, columns, array, i-1, enteredCol, &((*player1).score) );
+            checkScores(rows, columns, array, i-1, enteredCol, &((*player1).score) );
             if(gameMode == 't'){
                 if( (*player1).color == PLAYER1 ){
-                    save_state(rows,columns,array, *player1, *player2, Timeline);
+                    saveState(rows,columns,array, *player1, *player2, Timeline);
                 }
                 else{
-                    save_state(rows,columns,array, *player2, *player1, Timeline);
+                    saveState(rows,columns,array, *player2, *player1, Timeline);
                 }
             }
 
             maxRedo = stateIndex;
             break;
         }
-        else if( check_if_valid_col(rows, columns, array, enteredCol) == 2 ){   //Perform Undo
+        else if( checkIfValidInput(rows, columns, array, enteredCol) == 2 ){   //Perform Undo
             if(stateIndex > 0){
                 if( (*player1).color == PLAYER1 ){
                     undo( rows, columns, array, &(*player1), &(*player2), Timeline);
@@ -397,7 +414,7 @@ void take_player_turn(int rows,int columns,char array[rows][columns], Player *pl
                     }
                     else{
                         (*timeTaken).end=time(NULL);
-                        draw_board(rows,columns,array, *player1, *player2, *timeTaken);
+                        drawBoard(rows,columns,array, *player1, *player2, *timeTaken);
                     }
                 }
                 else{
@@ -407,7 +424,7 @@ void take_player_turn(int rows,int columns,char array[rows][columns], Player *pl
                     }
                     else{
                         (*timeTaken).end=time(NULL);
-                        draw_board(rows,columns,array, *player1, *player2, *timeTaken);
+                        drawBoard(rows,columns,array, *player1, *player2, *timeTaken);
                     }
                 }
             }
@@ -416,7 +433,7 @@ void take_player_turn(int rows,int columns,char array[rows][columns], Player *pl
             }
         }
 
-        else if( check_if_valid_col(rows, columns, array, enteredCol) == 3 ){       //Perform Redo
+        else if( checkIfValidInput(rows, columns, array, enteredCol) == 3 ){       //Perform Redo
             if(stateIndex < maxRedo){
                 if( (*player1).color == PLAYER1 ){
                     redo( rows, columns, array, &(*player1), &(*player2), Timeline);
@@ -425,7 +442,7 @@ void take_player_turn(int rows,int columns,char array[rows][columns], Player *pl
                     }
                     else{
                         (*timeTaken).end=time(NULL);
-                        draw_board(rows,columns,array, *player1, *player2, *timeTaken);
+                        drawBoard(rows,columns,array, *player1, *player2, *timeTaken);
                     }
                 }
                 else{
@@ -435,7 +452,7 @@ void take_player_turn(int rows,int columns,char array[rows][columns], Player *pl
                     }
                     else{
                         (*timeTaken).end=time(NULL);
-                        draw_board(rows,columns,array, *player1, *player2, *timeTaken);
+                        drawBoard(rows,columns,array, *player1, *player2, *timeTaken);
                     }
                 }
             }
@@ -443,6 +460,29 @@ void take_player_turn(int rows,int columns,char array[rows][columns], Player *pl
                 printf("Nothing To Redo !\n");
             }
         }
+
+        else if( checkIfValidInput(rows, columns, array, enteredCol) == 4 ){  //Save & quit
+            system("cls");
+            reset();
+            int gameSave;
+            do{
+                printf("Choose the file you would like to save to:\n1:Game Save 1\n2:Game Save 2\n3:Game Save 3\n");
+                scanf("%d", &gameSave);
+                if(gameSave>=1 && gameSave<=3){
+                    break;
+                }
+                printf("You must enter an integer from 1 to 3\3");
+            }while( gameSave<1 || gameSave>3 );
+
+            if(saveGame(gameSave, Timeline[stateIndex])){
+                printf("Save Successful");
+            }
+            else{
+                printf("Failed to save");
+            }
+            exit(0);
+        }
+
 
         else{
             printf("Invalid Input !\n");
@@ -466,13 +506,13 @@ void takeComputerTurn(int rows,int columns,char array[rows][columns], Player *co
 
     array[i-1][j]=(*computer).color;
     (*computer).numbOfMoves++;
-    check_scores(rows, columns, array, i-1, j, &((*computer).score) );
-    save_state(rows,columns,array, *player, *computer, Timeline);
+    checkScores(rows, columns, array, i-1, j, &((*computer).score) );
+    saveState(rows,columns,array, *player, *computer, Timeline);
     maxRedo = stateIndex;
 }
 
 
-int check_if_valid_col(int rows,int columns,char array[rows][columns], int enteredCol){
+int checkIfValidInput(int rows,int columns,char array[rows][columns], int enteredCol){
     if(enteredCol>=columns || enteredCol < -4){
         return 0;
     }
@@ -485,12 +525,15 @@ int check_if_valid_col(int rows,int columns,char array[rows][columns], int enter
     else if (enteredCol == -3){
         return 3;
     }
+    else if (enteredCol == -4){
+        return 4;
+    }
     else{
         return 1;
     }
 }
 
-void check_scores(int rows,int columns,char array[rows][columns], int enteredRow, int enteredCol, int *playerScore){
+void checkScores(int rows,int columns,char array[rows][columns], int enteredRow, int enteredCol, int *playerScore){
     //Check Horizontal
     if(enteredCol<columns-3 && ( array[enteredRow][enteredCol]==array[enteredRow][enteredCol+1] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol+2] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol+3] ) ){
         (*playerScore)++;
@@ -579,7 +622,7 @@ void check_scores(int rows,int columns,char array[rows][columns], int enteredRow
 }
 
 
-bool check_for_free_slots(int rows,int columns,char array[rows][columns]){
+bool checkForFreeSlots(int rows,int columns,char array[rows][columns]){
     bool free = false;
     for(int i=0; i<rows; i++){
         for (int j=0; j<columns; j++){
@@ -629,7 +672,7 @@ void printWinnerPlayerVsPlayer(Player player1,Player player2){
         }
 }
 
-void save_state(int rows, int columns, char array[rows][columns], Player p1, Player p2, State Timeline[rows*columns]){
+void saveState(int rows, int columns, char array[rows][columns], Player p1, Player p2, State Timeline[rows*columns]){
     if(stateIndex < (rows*columns)-1){
         stateIndex += 1;
         for (int i=0; i<rows; i++){
@@ -674,6 +717,33 @@ void redo(int rows,int columns,char array[rows][columns], Player *p1, Player *p2
     ((*p2).score) = Timeline[stateIndex].plr2.score;
     ((*p2).numbOfMoves) = Timeline[stateIndex].plr2.numbOfMoves;
 }
+
+bool saveGame(int gameSave, State *currentState){
+    FILE *saveFile;
+
+    switch(gameSave){
+        case 1:
+            saveFile = fopen("Game Save 1.bin", "wb");
+            break;
+        case 2:
+            saveFile = fopen("Game Save 2.bin", "wb");
+            break;
+        case 3:
+            saveFile = fopen("Game Save 3.bin", "wb");
+            break;
+    }
+
+    if(saveFile == NULL){ return false; }
+
+    if( fwrite(currentState, sizeof(State), 1, saveFile) != 1){return false;}
+
+    if(fclose(saveFile) == EOF){return false;}
+
+    return true;
+}
+
+
+
 
 /*int checkInt(char num[],MAX_SIZE){
     int i,sum=0;
