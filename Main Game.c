@@ -1,4 +1,4 @@
-#include <stdio.h>
+ #include <stdio.h>
 #include <stdlib.h>
 #include <conio.h>
 #include <windows.h>
@@ -58,7 +58,7 @@ void undo();                                // Undo the last move
 void redo();                                // Redo one move
 bool saveGame();                            // Saves the current game to a user chosen file
 State *loadGame();                          // Loads a game from a user chosen file
-
+void xml();                                 // Reads the xml file and determine the width,height and highscores
 
 int main(){
     // Main Menu
@@ -226,9 +226,8 @@ void playerVsComputer(State *loadedGame){
     int response = 1;
     gameMode = 'o';
     do{
-        int rows,columns;
-
-        if(xml(&rows,&columns)){
+            int rows,columns;
+            xml(&rows,&columns);
             char array[rows][columns];
             State Timeline[rows*columns];
 
@@ -308,10 +307,7 @@ void playerVsComputer(State *loadedGame){
                     response = 0;
                     break;
             }
-        }
-        else{
-            break;
-        }
+
     }while(response);
 }
 
@@ -320,9 +316,8 @@ void playerVsPlayer(State *loadedGame){
     int response = 1;
     gameMode = 't';
     do{
-        int rows,columns;
-
-        if(xml(&rows,&columns)){
+            int rows,columns;
+            xml(&rows,&columns);
             char array[rows][columns];
             State Timeline[rows*columns];
 
@@ -408,10 +403,6 @@ void playerVsPlayer(State *loadedGame){
                     response = 0;
                     break;
             }
-        }
-        else{
-            break;
-        }
     }while(response);
 }
 
@@ -846,14 +837,29 @@ State *loadGame(int gameSave){
 
 
 
-int xml(int *rows,int *columns){
-    int  highScores;
+void xml(int *rows,int *columns){
+    int highScores;
     char y,x[500]= {'0'},conf1[]="<Configurations>",width1[]="<Width>",height1[]="<Height>",highscores1[]="<Highscores>";
     char conf2[]="</Configurations>",width2[]="</Width>",height2[]="</Height>",highscores2[]="</Highscores>";
-    int i=0, len=0, fileCorrupted=0;
+    int i=0, len=0, fileCorrupted;
     int j,k,l,m,n,q,h,s,r,f;
     char height[256],width[256],scores[256];
-    FILE *file= fopen("project.xml", "r");
+
+   // FILE *file= fopen("project.xml", "r");
+  // FILE *file= fopen("C:\\Users\\antoi\\Desktop\\University\\1st Year\\1st Term\\Programming\\C Labs\\ex\\project.xml", "r");
+     char path[500]="C:\\Users\\antoi\\Desktop\\University\\1st Year\\1st Term\\Programming\\Connect-Four-Project\\Fall2022_CSE-121_Final-Project_Connect-Four\\project.xml";
+
+     int numbOfTrials=0;
+
+
+  while(numbOfTrials<3){
+        fileCorrupted=0;
+       // scanf("%c");
+    // fgets(path,500,stdin);
+    // scanf("%s",path);
+    //gets(path);
+    FILE *file= fopen(path, "r");
+   // FILE *file= fopen("project.xml", "r");
 
     while((y=fgetc(file)) && y!=EOF){
         if(y!=' '&&y!='\n'&&y!='\t'){
@@ -868,18 +874,26 @@ int xml(int *rows,int *columns){
 
     for(i=0; i<sizeof(conf1)-1; i++){
         if(x[i]!=conf1[i]){
-            printf("FILE CORRUPTED!");
-            fileCorrupted=0;
+            printf("FILE CORRUPTED!\n");
+            fileCorrupted=1;
             break;
         }
+    }
+    if(fileCorrupted==1){
+        numbOfTrials++;
+        continue;
     }
 
     for(j=0;j<sizeof(height1)-1; j++){
         if(x[i+j]!=height1[j]){
-            printf("FILE CORRUPTED!");
-            fileCorrupted=0;
+            printf("FILE CORRUPTED!\n");
+            fileCorrupted=1;
             break;
         }
+    }
+    if(fileCorrupted==1){
+        numbOfTrials++;
+        continue;
     }
     if (fileCorrupted==0){
         for (k=0; k<sizeof(height)-1; k++){
@@ -892,13 +906,23 @@ int xml(int *rows,int *columns){
         }
     }
     *rows=atoi(height);
+    if(*rows<4){
+        printf("The width and height should be greater or equal to 4\n");
+        fileCorrupted=1;
+        numbOfTrials++;
+        continue;
+    }
 
     for(l=0; l<sizeof(height2)-1; l++){
         if(x[i+j+k+l]!=height2[l]){
-            printf("FILE CORRUPTED!");
+            printf("FILE CORRUPTED!\n");
             fileCorrupted=1;
             break;
         }
+    }
+    if(fileCorrupted==1){
+        numbOfTrials++;
+        continue;
     }
 
     for(m=0; m<sizeof(width1)-1; m++){
@@ -907,6 +931,11 @@ int xml(int *rows,int *columns){
             fileCorrupted=1;
             break;
         }
+    }
+
+    if(fileCorrupted==1){
+        numbOfTrials++;
+        continue;
     }
 
     if (fileCorrupted==0){
@@ -920,7 +949,12 @@ int xml(int *rows,int *columns){
         }
     }
     *columns=atoi(width);
-
+    if(*rows<4){
+        printf("The width and height should be greater or equal to 4\n");
+        fileCorrupted=1;
+        numbOfTrials++;
+        continue;
+    }
 
     for(q=0; q<sizeof(width2)-1; q++){
         if(x[i+j+k+l+m+n+q]!=width2[q]){
@@ -929,6 +963,10 @@ int xml(int *rows,int *columns){
             break;
         }
     }
+    if(fileCorrupted==1){
+        numbOfTrials++;
+        continue;
+    }
 
     for(h=0; h<sizeof(highscores1)-1; h++){
         if(x[i+j+k+l+m+n+q+h]!=highscores1[h]){
@@ -936,6 +974,10 @@ int xml(int *rows,int *columns){
             fileCorrupted=1;
             break;
         }
+    }
+    if(fileCorrupted==1){
+        numbOfTrials++;
+        continue;
     }
 
     if (fileCorrupted==0){
@@ -957,6 +999,11 @@ int xml(int *rows,int *columns){
             break;
         }
     }
+    if(fileCorrupted==1){
+        numbOfTrials++;
+        continue;
+    }
+
     for(f=0; f<sizeof(conf2)-1; f++){
         if(x[i+j+k+l+m+n+q+h+s+r+f]!=conf2[f]){
             printf("FILE CORRUPTED!\n");
@@ -964,13 +1011,22 @@ int xml(int *rows,int *columns){
             break;
         }
     }
-
-    fclose(file);
-    if(fileCorrupted==0){
-        return 1;
+    if(fileCorrupted==1){
+        numbOfTrials++;
+        continue;
     }
-    else{
-        return 0;
+    if(fileCorrupted==0){
+        fclose(file);
+        break;
+    }
+
+
+    }
+    if (numbOfTrials==3){
+        *columns=7;
+        *rows=9;
+        highScores=10;
+
     }
 }
 
