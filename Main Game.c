@@ -1,4 +1,4 @@
- #include <stdio.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <conio.h>
 #include <windows.h>
@@ -236,7 +236,7 @@ void playerVsComputer(State *loadedGame){
             Time timeTaken;
 
             if(loadedGame == NULL){
-                printf("Enter Player name: "); scanf("%c");
+                printf("Enter Player name: ");
                 fgets(playerOne.name, 257, stdin);
                 playerOne.name[strlen(playerOne.name) - 1]='\0';
                 playerOne.color = PLAYER1;
@@ -326,7 +326,7 @@ void playerVsPlayer(State *loadedGame){
             Time timeTaken;
 
             if(loadedGame == NULL){
-                printf("Enter Player 1 name: "); scanf("%c");
+                printf("Enter Player 1 name: ");
                 fgets(playerOne.name, 257, stdin);
                 playerOne.name[strlen(playerOne.name) - 1]='\0';
                 playerOne.color = PLAYER1;
@@ -839,27 +839,29 @@ State *loadGame(int gameSave){
 
 void xml(int *rows,int *columns){
     int highScores;
-    char y,x[500]= {'0'},conf1[]="<Configurations>",width1[]="<Width>",height1[]="<Height>",highscores1[]="<Highscores>";
+    char conf1[]="<Configurations>",width1[]="<Width>",height1[]="<Height>",highscores1[]="<Highscores>";
     char conf2[]="</Configurations>",width2[]="</Width>",height2[]="</Height>",highscores2[]="</Highscores>";
-    int i=0, len=0, fileCorrupted;
+    int i=0,p, len=0, fileCorrupted;
     int j,k,l,m,n,q,h,s,r,f;
-    char height[256],width[256],scores[256];
-
-   // FILE *file= fopen("project.xml", "r");
-  // FILE *file= fopen("C:\\Users\\antoi\\Desktop\\University\\1st Year\\1st Term\\Programming\\C Labs\\ex\\project.xml", "r");
-     char path[500]="C:\\Users\\antoi\\Desktop\\University\\1st Year\\1st Term\\Programming\\Connect-Four-Project\\Fall2022_CSE-121_Final-Project_Connect-Four\\project.xml";
-
-     int numbOfTrials=0;
+    int numbOfTrials=0;
 
 
-  while(numbOfTrials<3){
-        fileCorrupted=0;
-       // scanf("%c");
-    // fgets(path,500,stdin);
-    // scanf("%s",path);
-    //gets(path);
+ while(numbOfTrials<3){
+        //system("cls");
+        char y,x[500]= {'0'};
+        char path[500]={'0'};
+        char height[256],width[256],scores[256];
+        printf("Enter the path of the file without the quotations: \n");
+        fileCorrupted=0,i=0,len=0;
+        fflush(stdin); gets(path);
+        for (p=0;p<strlen(path);p++){
+           if(path[p]=='\\'){
+               path[p]='/';
+            }
+        }
+
+
     FILE *file= fopen(path, "r");
-   // FILE *file= fopen("project.xml", "r");
 
     while((y=fgetc(file)) && y!=EOF){
         if(y!=' '&&y!='\n'&&y!='\t'){
@@ -868,9 +870,6 @@ void xml(int *rows,int *columns){
             len++;
         }
     }
-    /*for(i=0;i<len;i++){
-        printf("%c",x[i]);
-    }*/
 
     for(i=0; i<sizeof(conf1)-1; i++){
         if(x[i]!=conf1[i]){
@@ -881,6 +880,7 @@ void xml(int *rows,int *columns){
     }
     if(fileCorrupted==1){
         numbOfTrials++;
+        fclose(file);
         continue;
     }
 
@@ -893,6 +893,7 @@ void xml(int *rows,int *columns){
     }
     if(fileCorrupted==1){
         numbOfTrials++;
+        fclose(file);
         continue;
     }
     if (fileCorrupted==0){
@@ -910,6 +911,7 @@ void xml(int *rows,int *columns){
         printf("The width and height should be greater or equal to 4\n");
         fileCorrupted=1;
         numbOfTrials++;
+        fclose(file);
         continue;
     }
 
@@ -922,6 +924,7 @@ void xml(int *rows,int *columns){
     }
     if(fileCorrupted==1){
         numbOfTrials++;
+        fclose(file);
         continue;
     }
 
@@ -935,6 +938,7 @@ void xml(int *rows,int *columns){
 
     if(fileCorrupted==1){
         numbOfTrials++;
+        fclose(file);
         continue;
     }
 
@@ -953,6 +957,7 @@ void xml(int *rows,int *columns){
         printf("The width and height should be greater or equal to 4\n");
         fileCorrupted=1;
         numbOfTrials++;
+        fclose(file);
         continue;
     }
 
@@ -965,6 +970,7 @@ void xml(int *rows,int *columns){
     }
     if(fileCorrupted==1){
         numbOfTrials++;
+        fclose(file);
         continue;
     }
 
@@ -977,6 +983,7 @@ void xml(int *rows,int *columns){
     }
     if(fileCorrupted==1){
         numbOfTrials++;
+        fclose(file);
         continue;
     }
 
@@ -1001,6 +1008,7 @@ void xml(int *rows,int *columns){
     }
     if(fileCorrupted==1){
         numbOfTrials++;
+        fclose(file);
         continue;
     }
 
@@ -1013,6 +1021,7 @@ void xml(int *rows,int *columns){
     }
     if(fileCorrupted==1){
         numbOfTrials++;
+        fclose(file);
         continue;
     }
     if(fileCorrupted==0){
@@ -1023,6 +1032,7 @@ void xml(int *rows,int *columns){
 
     }
     if (numbOfTrials==3){
+        printf("Default Values Are Loaded: Columns=7 , Rows=9 , Highscores=10\n");
         *columns=7;
         *rows=9;
         highScores=10;
@@ -1033,18 +1043,3 @@ void xml(int *rows,int *columns){
 
 
 
-
-/*int checkInt(char num[],MAX_SIZE){
-    int i,sum=0;
-    for(i=0;i<=strlen(num),i++){
-        if (isdigit(num[i])){
-            sum++;
-        }
-    }
-    if(sum==strlen(nym)){
-        return 1;
-    }
-    else {
-        return 0;
-    }
-}*/
