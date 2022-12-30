@@ -227,28 +227,10 @@ void playerVsComputer(State *loadedGame){
     gameMode = 'o';
     do{
         int rows,columns;
-        /*while(1){
-            printf("Enter the size of the grid: ");
-            scanf("%d %d",&rows,&columns);
-            if(rows<4 || columns<4){
-                printf("Rows and Columns must be greater or equal to 4 !\n");
-            }
-            else{
-                break;
-            }
-        }*/
 
         if(xml(&rows,&columns)){
             char array[rows][columns];
             State Timeline[rows*columns];
-
-            /*for(int t=0; t<rows*columns; t++){
-                Timeline[t].board = malloc(rows * sizeof(char*));
-                for(int i = 0; i < rows; i++) {
-                  Timeline[t].board[i] = malloc(columns * sizeof(char));
-                }
-            }*/
-
 
             Player playerOne;
             Player computer;
@@ -339,16 +321,7 @@ void playerVsPlayer(State *loadedGame){
     gameMode = 't';
     do{
         int rows,columns;
-        /*while(1){
-            printf("Enter the size of the grid: ");
-            scanf("%d %d",&rows,&columns);
-            if(rows<4 || columns<4){
-                printf("Grid size must be at least 4x4 !\n");
-            }
-            else{
-                break;
-            }
-        }*/
+
         if(xml(&rows,&columns)){
             char array[rows][columns];
             State Timeline[rows*columns];
@@ -462,6 +435,7 @@ void takePlayerTurn(int rows,int columns,char array[rows][columns], Player *play
         }
         while(enteredCol == 0 || (double)enteredCol!=floatCol);
         if (enteredCol==-4){
+                reset();
                 exit(0);
         }
         enteredCol--;
