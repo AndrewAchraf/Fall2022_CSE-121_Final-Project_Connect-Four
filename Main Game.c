@@ -164,6 +164,10 @@ int main(){
         }
        }while(quit == 0);
 
+    system("cls");
+    printf("Quitting ...");
+    Sleep(1500);
+
     return 0;
 }
 
@@ -459,6 +463,9 @@ void takePlayerTurn(int rows,int columns,char array[rows][columns], Player *play
         while(enteredCol == 0 || (double)enteredCol!=floatCol);
         if (enteredCol==-4){
                 reset();
+                system("cls");
+                printf("Quitting ...");
+                Sleep(1500);
                 exit(0);
         }
         enteredCol--;
