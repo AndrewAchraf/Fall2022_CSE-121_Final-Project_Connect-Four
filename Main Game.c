@@ -1,4 +1,4 @@
-#include <stdio.h>
+ #include <stdio.h>
 #include <stdlib.h>
 #include <conio.h>
 #include <windows.h>
@@ -6,15 +6,23 @@
 #include <stdbool.h>
 #include <string.h>
 #include<time.h>
+#include <errno.h>
+#include <ctype.h>
 
 const char PLAYER1='X';         //The player represented by this shape is displayed on the left of the screen in red
 const char PLAYER2='O';         //The player represented by this shape is displayed on the right of the screen in yellow
+
+int stateIndex= -1;         // Keeps track of the current state in the stack
+int maxRedo;                //
+char gameMode;
+
 
 typedef struct{
     int score;
     char name[257];
     char color;
     int numbOfMoves;
+    int rank;
 }Player;
 
 typedef struct{
@@ -25,17 +33,19 @@ typedef struct{
 }Time;
 
 typedef struct{
+    int rows;
+    int columns;
+    int highScores;
+}Configuration;
+
+
+typedef struct{
     char board[100][100];
     Player plr1;
     Player plr2;
     Time gameTime;
     char oneOrTwoPlayers;
 }State;
-
-
-int stateIndex= -1;         // Keeps track of the current state in the stack
-int maxRedo;                //
-char gameMode;
 
 
 void clearBoard();                          // Empties the board array from all garbage values
@@ -59,14 +69,34 @@ void redo();                                // Redo one move
 bool saveGame();                            // Saves the current game to a user chosen file
 State *loadGame();                          // Loads a game from a user chosen file
 void xml();                                 // Reads the xml file and determine the width,height and highscores
+void convertToUppercase();                  // Converts the player name to all upper case characters in order to save it in the highscores
+bool updateHighScores();                    // Updates the high score list with the last game winner's name
+int sortHighScores();                       // Sorts the high score list and returns the current winner's rank
+void displayHighscores();                   // Prints the high scores list
+
+
 
 int main(){
+    //Enter path for the xml configuration file
+    Configuration gameConfiguration;
+    xml( &(gameConfiguration.rows), &(gameConfiguration.columns), &(gameConfiguration.highScores) );
+
     // Main Menu
     int quit = 0;
-    //char newOrLoaded;
     do{
         system("cls");
+        yellow();
+        printf("\t+---------------------------------------+\n");
+        printf("\t|                                       |\n");
+        printf("\t|\t  Game Of Connect Four          |\n");
+        printf("\t|\t        Welcome !               |\n");
+        printf("\t|                                       |\n");
+        printf("\t+---------------------------------------+\n");
+
+        printf("\t\t       Main Menu \n\n");
+        reset();
         printf(" 1: Start a new game\n 2: Load a previous game\n 3: Highscores\n 4: Quit\n");
+
         char choice;
         scanf(" %1c", &choice);
 
@@ -78,12 +108,12 @@ int main(){
                 switch(choice){
                     case '1':
                         // Player v Computer
-                        playerVsComputer(NULL);
+                        playerVsComputer(NULL, gameConfiguration);
                         break;
 
                     case '2':
                         // Player v Player
-                        playerVsPlayer(NULL);
+                        playerVsPlayer(NULL, gameConfiguration);
                         break;
                     case '3':
                         break;
@@ -92,7 +122,7 @@ int main(){
                 }
                 break;
 
-            case '2':              // Load a game
+            case '2':                   // Load a game
                 system("cls");
                 int gameSave;
                 do{
@@ -109,25 +139,30 @@ int main(){
                 State *loadedGame;
                 loadedGame = loadGame(gameSave);
 
-                if(loadedGame[0].oneOrTwoPlayers == 't'){ playerVsPlayer(*loadedGame); }
-                else{ playerVsComputer(*loadedGame); }
+                if(loadedGame[0].oneOrTwoPlayers == 't'){ playerVsPlayer(*loadedGame, gameConfiguration); }
+                else{ playerVsComputer(*loadedGame, gameConfiguration); }
 
                 break;
 
-            case '3':  break;    //Highscores
+            case '3':               //Highscores
+                while(true){
+                    system("cls");
+                    int response = 0;
+                    displayHighscores(gameConfiguration);
+                    printf("1: Back to main menu\n");
+                    scanf("%d", &response);
+                    if(response == 1){
+                        break;
+                    }
+                }
+
+
+                break;
             case '4':       // Quit the game
                 quit = 1;
                 break;
-            //default: printf("Invalid Input !\n");
         }
-       }
-       /*else{
-        system("cls");
-        printf(" 1:Start a new game\n 2:Load a previous game\n 3:Quit\n");
-        scanf("%c", &choice);
-       }*/
-
-    while(quit == 0);
+       }while(quit == 0);
 
     return 0;
 }
@@ -221,22 +256,20 @@ void printNamesAndScores(Player player){
     printf(": Score= %d & Number of moves= %d", player.score,player.numbOfMoves);
 }
 
-void playerVsComputer(State *loadedGame){
-    system("cls");
+void playerVsComputer(State *loadedGame, Configuration gameConfiguration){
     int response = 1;
     gameMode = 'o';
     do{
-            int rows,columns;
-            xml(&rows,&columns);
-            char array[rows][columns];
-            State Timeline[rows*columns];
+            system("cls");
+            char array[(gameConfiguration.rows)][(gameConfiguration.columns)];
+            State Timeline[(gameConfiguration.rows)*(gameConfiguration.columns)];
 
             Player playerOne;
             Player computer;
             Time timeTaken;
 
             if(loadedGame == NULL){
-                printf("Enter Player name: ");
+                printf("Enter Player name: ");scanf("%c");
                 fgets(playerOne.name, 257, stdin);
                 playerOne.name[strlen(playerOne.name) - 1]='\0';
                 playerOne.color = PLAYER1;
@@ -252,11 +285,11 @@ void playerVsComputer(State *loadedGame){
                 timeTaken.start= time(NULL);
                 timeTaken.end= time(NULL);
 
-                clearBoard(rows,columns,array);
+                clearBoard((gameConfiguration.rows),(gameConfiguration.columns),array);
             }
             else{
-                for (int i=0; i<rows; i++){
-                    for (int j=0; j<columns; j++){
+                for (int i=0; i<(gameConfiguration.rows); i++){
+                    for (int j=0; j<(gameConfiguration.columns); j++){
                         array[i][j] = loadedGame[0].board[i][j];
                     }
                 }
@@ -275,28 +308,29 @@ void playerVsComputer(State *loadedGame){
                 timeTaken.end= loadedGame[0].gameTime.end;
             }
 
-            saveState(rows,columns,array, playerOne, computer, timeTaken, Timeline);
-            drawBoard(rows,columns,array, playerOne, computer, timeTaken);
+            saveState((gameConfiguration.rows),(gameConfiguration.columns),array, playerOne, computer, timeTaken, Timeline);
+            drawBoard((gameConfiguration.rows),(gameConfiguration.columns),array, playerOne, computer, timeTaken);
 
             timeTaken.start=time(NULL);
 
-            while( checkForFreeSlots(rows,columns,array) ){
+            while( checkForFreeSlots((gameConfiguration.rows),(gameConfiguration.columns),array) ){
                 red();
-                takePlayerTurn(rows,columns,array, &playerOne, &computer, &timeTaken, Timeline);
+                takePlayerTurn((gameConfiguration.rows),(gameConfiguration.columns),array, &playerOne, &computer, &timeTaken, Timeline);
                 reset();
                 if(loadedGame == NULL) { timeTaken.end= time(NULL); }
                 else{ timeTaken.end= time(NULL) + difftime(loadedGame[0].gameTime.end, loadedGame[0].gameTime.start); }
-                drawBoard(rows,columns,array, playerOne, computer, timeTaken);
+                drawBoard((gameConfiguration.rows),(gameConfiguration.columns),array, playerOne, computer, timeTaken);
 
-                if(checkForFreeSlots(rows,columns,array)== 0){ break; }
-                takeComputerTurn(rows,columns,array, &computer, &playerOne, Timeline);
+                if(checkForFreeSlots((gameConfiguration.rows),(gameConfiguration.columns),array)== 0){ break; }
+                takeComputerTurn((gameConfiguration.rows),(gameConfiguration.columns),array, &computer, &playerOne, Timeline);
                 if(loadedGame == NULL) { timeTaken.end= time(NULL); }
                 else { timeTaken.end= time(NULL) + difftime(loadedGame[0].gameTime.end, loadedGame[0].gameTime.start); }
-                saveState(rows,columns,array, playerOne, computer, timeTaken, Timeline);
-                drawBoard(rows,columns,array, playerOne, computer, timeTaken);
+                saveState((gameConfiguration.rows),(gameConfiguration.columns),array, playerOne, computer, timeTaken, Timeline);
+                maxRedo = stateIndex;
+                drawBoard((gameConfiguration.rows),(gameConfiguration.columns),array, playerOne, computer, timeTaken);
             }
 
-            printWinnerPlayerVsComputer(playerOne,computer);
+            printWinnerPlayerVsComputer(playerOne,computer, gameConfiguration);
 
             printf("1: Play Again\n2: Main Menu\n");
             scanf("%d", &response);
@@ -311,29 +345,27 @@ void playerVsComputer(State *loadedGame){
     }while(response);
 }
 
-void playerVsPlayer(State *loadedGame){
-    system("cls");
+void playerVsPlayer(State *loadedGame, Configuration gameConfiguration){
     int response = 1;
     gameMode = 't';
     do{
-            int rows,columns;
-            xml(&rows,&columns);
-            char array[rows][columns];
-            State Timeline[rows*columns];
+            system("cls");
+            char array[(gameConfiguration.rows)][(gameConfiguration.columns)];
+            State Timeline[(gameConfiguration.rows)*(gameConfiguration.columns)];
 
             Player playerOne;
             Player playerTwo;
             Time timeTaken;
 
             if(loadedGame == NULL){
-                printf("Enter Player 1 name: ");
+                printf("Enter Player 1 name: "); scanf("%d");
                 fgets(playerOne.name, 257, stdin);
                 playerOne.name[strlen(playerOne.name) - 1]='\0';
                 playerOne.color = PLAYER1;
                 playerOne.score = 0;
                 playerOne.numbOfMoves=0;
 
-                printf("Enter Player 2 name: ");
+                printf("Enter Player 2 name: "); scanf("%d");
                 fgets(playerTwo.name, 257, stdin);
                 playerTwo.name[strlen(playerTwo.name) - 1]='\0';
                 playerTwo.color = PLAYER2;
@@ -343,12 +375,12 @@ void playerVsPlayer(State *loadedGame){
                 timeTaken.start=time(NULL);
                 timeTaken.end=time(NULL);
 
-                clearBoard(rows,columns,array);
+                clearBoard((gameConfiguration.rows),(gameConfiguration.columns),array);
             }
 
             else{
-                for (int i=0; i<rows; i++){
-                    for (int j=0; j<columns; j++){
+                for (int i=0; i<(gameConfiguration.rows); i++){
+                    for (int j=0; j<(gameConfiguration.columns); j++){
                         array[i][j] = loadedGame[0].board[i][j];
                     }
                 }
@@ -369,30 +401,30 @@ void playerVsPlayer(State *loadedGame){
 
 
 
-            saveState(rows,columns, array, playerOne, playerTwo, timeTaken, Timeline);
-            drawBoard(rows,columns, array, playerOne, playerTwo, timeTaken);
+            saveState((gameConfiguration.rows),(gameConfiguration.columns), array, playerOne, playerTwo, timeTaken, Timeline);
+            drawBoard((gameConfiguration.rows),(gameConfiguration.columns), array, playerOne, playerTwo, timeTaken);
 
             timeTaken.start=time(NULL);
 
-            while( checkForFreeSlots(rows,columns,array) ){
+            while( checkForFreeSlots((gameConfiguration.rows),(gameConfiguration.columns),array) ){
                 red();
-                takePlayerTurn(rows,columns,array, &playerOne, &playerTwo, &timeTaken, Timeline);
+                takePlayerTurn((gameConfiguration.rows),(gameConfiguration.columns),array, &playerOne, &playerTwo, &timeTaken, Timeline);
                 reset();
                 if(loadedGame == NULL) { timeTaken.end= time(NULL); }
                 else{ timeTaken.end= time(NULL) + difftime(loadedGame[0].gameTime.end, loadedGame[0].gameTime.start); }
-                drawBoard(rows,columns,array, playerOne, playerTwo, timeTaken);
+                drawBoard((gameConfiguration.rows),(gameConfiguration.columns),array, playerOne, playerTwo, timeTaken);
 
-                if(checkForFreeSlots(rows,columns,array)== 0){ break; }
+                if(checkForFreeSlots((gameConfiguration.rows),(gameConfiguration.columns),array)== 0){ break; }
 
                 yellow();
-                takePlayerTurn(rows,columns,array, &playerTwo, &playerOne, &timeTaken, Timeline);
+                takePlayerTurn((gameConfiguration.rows),(gameConfiguration.columns),array, &playerTwo, &playerOne, &timeTaken, Timeline);
                 reset();
                 if(loadedGame == NULL) { timeTaken.end= time(NULL); }
                 else{ timeTaken.end= time(NULL) + difftime(loadedGame[0].gameTime.end, loadedGame[0].gameTime.start); }
-                drawBoard(rows,columns,array, playerOne, playerTwo, timeTaken);
+                drawBoard((gameConfiguration.rows),(gameConfiguration.columns),array, playerOne, playerTwo, timeTaken);
             }
 
-            printWinnerPlayerVsPlayer(playerOne,playerTwo);
+            printWinnerPlayerVsPlayer(playerOne, playerTwo, gameConfiguration);
 
             printf("1: Play Again\n2: Main Menu\n");
             scanf("%d", &response);
@@ -522,7 +554,8 @@ void takePlayerTurn(int rows,int columns,char array[rows][columns], Player *play
             }while( gameSave<1 || gameSave>3 );
 
             if(saveGame(gameSave, &Timeline[stateIndex])){
-                printf("Save Successful");
+                printf("Save Successful, Exiting game ...");
+                Sleep(1);
             }
             else{
                 printf("Failed to save");
@@ -554,8 +587,6 @@ void takeComputerTurn(int rows,int columns,char array[rows][columns], Player *co
     array[i-1][j]=(*computer).color;
     (*computer).numbOfMoves++;
     checkScores(rows, columns, array, i-1, j, &((*computer).score) );
-    //saveState(rows,columns,array, *player, *computer, Timeline);
-    maxRedo = stateIndex;
 }
 
 
@@ -665,7 +696,6 @@ void checkScores(int rows,int columns,char array[rows][columns], int enteredRow,
         }
     }
 
-//if( array[enteredRow][enteredCol]==array[enteredRow][enteredCol] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol] && array[enteredRow][enteredCol]==array[enteredRow][enteredCol] )
 }
 
 
@@ -682,41 +712,71 @@ bool checkForFreeSlots(int rows,int columns,char array[rows][columns]){
 }
 
 
-void printWinnerPlayerVsComputer(Player player1,Player computer){
+void printWinnerPlayerVsComputer(Player player1,Player computer, Configuration gameConfiguration){
     if (player1.score>computer.score){
             red();
             printf("WINNER! Great job, ");
             fputs(player1.name,stdout);
             printf(".\n");
+            bool newHighScore;
+            if( updateHighScores(&player1, &newHighScore) ){
+                printf("Score Saved successfully\n");
+            }
+            else{
+                printf("Error saving score\n");
+            }
+            printf("\n%s's rank : %d\n", player1.name, sortHighScores(player1));
             reset();
+            if(newHighScore){
+                printf("New personal highscore achieved !\nCongratulations, %s, take a look at your new rank !\n\n", player1.name);
+                displayHighscores(gameConfiguration);
+            }
         }
-        else if (player1.score<computer.score){
-            yellow();
-            printf("You Lost. Hard luck. Have another try.\n");
-            reset();
-        }
-        else{
-            printf("Draw.\n");
-        }
+    else if (player1.score<computer.score){
+        yellow();
+        printf("You Lost. Hard luck. Have another try.\n");
+        reset();
+    }
+    else{
+        printf("Draw.\n");
+    }
 }
 
 
-void printWinnerPlayerVsPlayer(Player player1,Player player2){
-    if(player1.score>player2.score){
-            red();
-            fputs(player1.name,stdout);
-            printf(" Wins! Congrats !\n");
-            reset();
-        }
-        else if (player1.score<player2.score){
-            yellow();
-            fputs(player2.name,stdout);
-            printf(" Wins! Congrats !\n");
-            reset();
-        }
-        else{
-            printf("Draw.\n");
-        }
+void printWinnerPlayerVsPlayer(Player player1, Player player2, Configuration gameConfiguration){
+    bool newHighScore;
+    if( player1.score > player2.score ){
+        red();
+        fputs( player1.name, stdout);
+        printf(" Wins with score %d ! Congrats !\n", player1.score);
+        if( updateHighScores(&player1, &newHighScore) ){ printf("Score Saved successfully\n"); }
+        else{ printf("Error saving score\n"); }
+        printf("\n%s's rank : %d\n", player1.name, sortHighScores(player1));
+        reset();
+        if(newHighScore){
+                printf("New personal highscore achieved !\nCongratulations, %s, take a look at your new rank !\n\n", player1.name);
+                displayHighscores(gameConfiguration);
+            }
+    }
+
+
+    else if ( player1.score < player2.score){
+        yellow();
+        fputs( player2.name,stdout);
+        printf(" Wins with score %d ! Congrats !\n", player2.score);
+        if( updateHighScores(&player2, &newHighScore) ){ printf("Score Saved successfully\n"); }
+        else{ printf("Error saving score\n"); }
+        printf("\n%s's rank : %d\n", player1.name, sortHighScores(player2));
+        reset();
+        if(newHighScore){
+                printf("New personal highscore achieved !\nCongratulations, %s, take a look at your new rank !\n\n", player2.name);
+                displayHighscores(gameConfiguration);
+            }
+    }
+
+    else{
+        printf("Draw.\n");
+    }
 }
 
 void saveState(int rows, int columns, char array[rows][columns], Player p1, Player p2, Time timeTaken, State Timeline[rows*columns]){
@@ -748,7 +808,6 @@ void saveState(int rows, int columns, char array[rows][columns], Player p1, Play
 
 void undo(int rows,int columns,char array[rows][columns], Player *p1, Player *p2, State Timeline[rows*columns]){
     if(stateIndex > 0){ stateIndex -= 1 ; }
-    //if(stateIndex > 1 && gameMode == 'o'){ stateIndex -= 2 ; }
 
     for (int i=0; i<rows; i++){
         for(int j=0; j<columns; j++){
@@ -837,8 +896,8 @@ State *loadGame(int gameSave){
 
 
 
-void xml(int *rows,int *columns){
-    int highScores;
+void xml(int *rows,int *columns, int *highScores){
+
     char conf1[]="<Configurations>",width1[]="<Width>",height1[]="<Height>",highscores1[]="<Highscores>";
     char conf2[]="</Configurations>",width2[]="</Width>",height2[]="</Height>",highscores2[]="</Highscores>";
     int i=0,p, len=0, fileCorrupted;
@@ -847,7 +906,6 @@ void xml(int *rows,int *columns){
 
 
  while(numbOfTrials<3){
-        //system("cls");
         char y,x[500]= {'0'};
         char path[500]={'0'};
         char height[256],width[256],scores[256];
@@ -997,7 +1055,7 @@ void xml(int *rows,int *columns){
             }
         }
     }
-    highScores=atoi(scores);
+    *highScores=atoi(scores);
 
     for(r=0; r<sizeof(highscores2)-1; r++){
         if(x[i+j+k+l+m+n+q+h+s+r]!=highscores2[r]){
@@ -1035,11 +1093,151 @@ void xml(int *rows,int *columns){
         printf("Default Values Are Loaded: Columns=7 , Rows=9 , Highscores=10\n");
         *columns=7;
         *rows=9;
-        highScores=10;
+        *highScores=10;
 
     }
 }
 
+void convertToUppercase(char *string){
+    for (int j=0; j<strlen(string); j++) {
+        string[j] = toupper(string[j]);
+    }
+}
 
 
+bool updateHighScores(Player *newPlayer, bool *newHighScore){
+
+    convertToUppercase( (*newPlayer).name );
+
+    FILE *highscoresFile;
+    highscoresFile = fopen("Highscores.bin", "rb");
+    if(highscoresFile == NULL){
+        printf("Error: fopen error number %d, %s.\n", errno, strerror(errno));
+        return false;
+    }
+
+    //This part checks whether the winner has played before or not
+
+    Player *oldRecords;
+    fseek(highscoresFile, 0, SEEK_END);
+    int numOfRecords = ftell(highscoresFile)/sizeof(Player);
+    oldRecords = malloc( sizeof(Player) * numOfRecords );
+
+    rewind(highscoresFile);
+    for(int i=0; i<numOfRecords; i++){
+        fread(&oldRecords[i], sizeof(Player), 1, highscoresFile);
+    }
+    fclose(highscoresFile);
+
+    bool duplicate = false;
+    for(int i=0; i<numOfRecords; i++){
+        if( strcmp( (*newPlayer).name, oldRecords[i].name ) == 0 ){
+             duplicate = true;
+             if( (*newPlayer).score > oldRecords[i].score ){
+                oldRecords[i].score =  (*newPlayer).score;
+                *newHighScore = true;
+             }
+             break;
+        }
+    }
+
+    // If the player has played before and has set a new highscore
+    if( duplicate && (*newHighScore) ){
+        highscoresFile = fopen("Highscores.bin", "wb");
+        for(int i=0; i<numOfRecords; i++){
+            fwrite(&oldRecords[i], sizeof(Player), 1, highscoresFile);
+        }
+    }
+
+    // In case it is the first time for the player
+    else if ( !duplicate ) {
+        highscoresFile = fopen("Highscores.bin", "ab");
+        if( fwrite( newPlayer, sizeof(Player), 1, highscoresFile) != 1){
+            printf("Error: fwrite error number %d, %s.\n", errno, strerror(errno));
+            return false;
+        }
+    }
+
+    fclose(highscoresFile);
+
+    return true;
+}
+
+int sortHighScores(Player toBeSorted){
+
+    int playerRank;
+
+    FILE *highscoresFile;
+    highscoresFile = fopen("Highscores.bin", "rb");
+
+    if(highscoresFile == NULL){
+        printf("Error: fopen error number %d, %s.\n", errno, strerror(errno));
+        return 0;
+    }
+
+
+    Player *oldRecords;
+    fseek(highscoresFile, 0, SEEK_END);
+    int numOfRecords = ftell(highscoresFile)/sizeof(Player);
+    oldRecords = malloc( sizeof(Player) * numOfRecords );
+
+
+    rewind(highscoresFile);
+    for(int i=0; i<numOfRecords; i++){
+        fread(&oldRecords[i], sizeof(Player), 1, highscoresFile);
+    }
+    fclose(highscoresFile);
+
+
+    Player temp;
+    for(int i=0; i<numOfRecords; i++){
+        for(int j=i+1; j<numOfRecords; j++){
+            if(oldRecords[i].score < oldRecords[j].score){
+                temp = oldRecords[j];
+                oldRecords[j] = oldRecords[i];
+                oldRecords[i] = temp;
+            }
+        }
+    }
+
+    for (int i=0; i<numOfRecords; i++){
+        if( strcmp( toBeSorted.name, oldRecords[i].name ) == 0 ){
+                playerRank = i+1;
+            }
+    }
+
+    highscoresFile = fopen("Highscores.bin", "wb");
+
+    for(int i=0; i<numOfRecords; i++){
+        fwrite(&oldRecords[i], sizeof(Player), 1, highscoresFile);
+    }
+
+    fclose(highscoresFile);
+    return playerRank;
+}
+
+
+void displayHighscores(Configuration gameConfiguration){
+
+    FILE *highscoresFile;
+    Player pl;
+
+    highscoresFile = fopen("Highscores.bin", "rb");
+
+    printf("\t HIGHSCORES\n");
+    printf("------------------------------------------\n");
+    printf("  Rank\t|    Name\t|   Score\n");
+    printf("------------------------------------------\n");
+
+
+    int i=0;
+    while( fread(&pl, sizeof(Player), 1, highscoresFile) && i< gameConfiguration.highScores ){
+        printf("    %d\t|    %s\t|    %d\n", i+1, pl.name, pl.score);
+        printf("------------------------------------------\n");
+        i++;
+    }
+    printf("\n");
+
+    fclose(highscoresFile);
+}
 
