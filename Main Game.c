@@ -561,8 +561,9 @@ void takePlayerTurn(int rows,int columns,char array[rows][columns], Player *play
             }while( gameSave<1 || gameSave>3 );
 
             if(saveGame(gameSave, &Timeline[stateIndex])){
+                system("cls");
                 printf("Save Successful, Exiting game ...");
-                Sleep(1);
+                Sleep(1500);
             }
             else{
                 printf("Failed to save");
@@ -724,7 +725,7 @@ void printWinnerPlayerVsComputer(Player player1,Player computer, Configuration g
             red();
             printf("WINNER! Great job, ");
             fputs(player1.name,stdout);
-            printf(".\n");
+            printf(" ,you won with score %d.\n", player1.score);
             bool newHighScore;
             if( updateHighScores(&player1, &newHighScore) ){
                 printf("Score Saved successfully\n");
