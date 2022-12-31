@@ -1117,11 +1117,13 @@ bool updateHighScores(Player *newPlayer, bool *newHighScore){
     convertToUppercase( (*newPlayer).name );
 
     FILE *highscoresFile;
-    highscoresFile = fopen("Highscores.bin", "rb");
+    highscoresFile = fopen("Highscores.bin", "ab");
     if(highscoresFile == NULL){
         printf("Error: fopen error number %d, %s.\n", errno, strerror(errno));
         return false;
     }
+    fclose(highscoresFile);
+    highscoresFile = fopen("Highscores.bin", "rb");
 
     //This part checks whether the winner has played before or not
 
