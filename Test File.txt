@@ -1,2 +1,0 @@
-C is garbage
-I hate programming in C
