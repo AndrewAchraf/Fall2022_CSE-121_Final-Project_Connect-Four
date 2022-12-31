@@ -13,8 +13,8 @@ const char PLAYER1='X';         //The player represented by this shape is displa
 const char PLAYER2='O';         //The player represented by this shape is displayed on the right of the screen in yellow
 
 int stateIndex= -1;         // Keeps track of the current state in the stack
-int maxRedo;                //
-char gameMode;
+int maxRedo;                //  Keeps track of the current maximum number of redoes
+char gameMode;              // Indicates whether the current is one player('o') or two players('t')
 
 
 typedef struct{
@@ -22,7 +22,6 @@ typedef struct{
     char name[257];
     char color;
     int numbOfMoves;
-    int rank;
 }Player;
 
 typedef struct{
@@ -144,7 +143,7 @@ int main(){
 
                 break;
 
-            case '3':               //Highscores
+            case '3':               //Print Highscores
                 while(true){
                     system("cls");
                     int response = 0;
@@ -158,7 +157,7 @@ int main(){
 
 
                 break;
-            case '4':       // Quit the game
+            case '4':               // Quit the game
                 quit = 1;
                 break;
         }
