@@ -913,20 +913,24 @@ void xml(int *rows,int *columns, int *highScores){
 
 
  while(numbOfTrials<3){
+        FILE *file;
         char y,x[500]= {'0'};
         char path[500]={'0'};
         char height[256],width[256],scores[256];
-        printf("Enter the path of the file without the quotations: \n");
         fileCorrupted=0,i=0,len=0;
-        fflush(stdin); gets(path);
-        for (p=0;p<strlen(path);p++){
-           if(path[p]=='\\'){
-               path[p]='/';
+
+        file = fopen("Configuration.xml", "r");
+
+        if(file == NULL){
+            printf("Enter the path of the file without the quotations: \n");
+            fflush(stdin); gets(path);
+            for (p=0;p<strlen(path);p++){
+               if(path[p]=='\\'){
+                   path[p]='/';
+                }
             }
+            file= fopen(path, "r");
         }
-
-
-    FILE *file= fopen(path, "r");
 
     while((y=fgetc(file)) && y!=EOF){
         if(y!=' '&&y!='\n'&&y!='\t'){
